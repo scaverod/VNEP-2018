@@ -1,0 +1,232 @@
+\chapter{Column Generation}
+\label{ch:cg}
+
+Column generation is a mathematical programming technique proposed by Dantzig and Wolfe \cite{Dantzig:1960} 
+to solve models with a large number of variables.
+These ``large'' models usually provide better bounds on the optimal integer solutions than compact models, and this is the case for the VNEP.
+%The restricted master problem, comprised of a subset of variables (columns), is solved at each iteration of the CG.
+
+Although the number of variables in a large model grows exponentially with the size of the instance,
+the number of nonzero variables in a solution is small.
+The column generation algorithm takes advantage of that.
+A Restricted Master Problem (RMP) comprised of a limited set of columns is solved.
+More columns are generated and added to the RMP by solving a subproblem (pricing), until no more columns improving the solution.
+%When no more columns are generated that could improve the solution, the optimal solution is found.
+
+The proposed column generation algorithm is summarized in Algorithm~\ref{alg:cg}.
+Initially, in Line~\ref{alg:artificial}, artificial variables are added to the RMP so that there is always a feasible solution.
+That process is explained in Section~\ref{sec:initcol}.
+The RMP is solved in Line~\ref{alg:solve}.
+The pricing problem is solved in lines~\ref{alg:pricingbegin} through~\ref{alg:pricingend},
+and it is further explained in Section~\ref{sec:pricing}
+The pricing problem generates columns to be added to the RMP, and when no more columns are generated, the algorithm stops.
+
+\begin{algorithm}
+%\scriptsize
+\caption{Column Generation Algorithm for VNEP.}
+$P' = \emptyset$\;
+Add artificial variables to the model such that model is feasible\; \label{alg:artificial}
+\Repeat{No paths were added to $P'$}
+  {Solve model with limited set of columns $P'$\; \label{alg:solve}
+  \ForEach{Virtual link $(u,v) \in E^{V}$ \label{alg:pricingbegin} }
+    {Construct auxiliary graph $A$ using dual variables\; \label{alg:aux}
+    Find minimum cost $u$-$v$-path $p$ in $A$ with reduced cost $r_{p}$\; \label{alg:findpaths}
+    \If{$r_{p} < 0$}
+      {Add path to $P'$\;}
+    } \label{alg:pricingend}
+  }
+\eIf{All artificial variables are equal to zero\label{alg:feascond}}
+  {The problem is solved optimally\;}
+  {The problem is infeasible\;}
+\label{alg:cg}
+\end{algorithm}
+
+This algorithm is based on a column generation algorithm introduced in~\cite{hu:2013}.
+However, that approach allows virtual links to be mapped to multiple paths.
+Next we describe how to adapt those approach to the single-path VNEP.
+
+\section{Obtaining an initial set of columns}
+\label{sec:initcol}
+With no columns, the RMP is initially infeasible. %, but could be made feasible with additional columns. 
+An approach similar to the simplex two-phase method is used to add columns comprised of a set $X_0$ of artificial decision variables to have a feasible RMP. Variables $X_0$ are added to Constraints~\eqref{eq:virdemone} and~\eqref{eq:bandwidth} of the flow-model presented in Section~\ref{sec:models}, and impose a high penalty to the objective function. % with a large value $K$. 
+Any feasible solution to the original RMP have a better objective value than a solution that uses any variable of~$X_0$. 
+When the column generation algorithm stops, if some $X_0$ variable has a value different than zero, the original RMP is infeasible. Otherwise $X_0$ variables are discarded.
+
+\section{The Pricing Problem}
+\label{sec:pricing}
+At each iteration, new columns are generated implicitly and added to the RMP.
+Columns are obtained solving a pricing problem that consists in finding the column with the minimum reduced cost.
+If the column with the minimum reduced cost has a negative value, the column is added to the RMP. Otherwise, no column can improve the current solution, and thus the current solution is optimal.
+
+Let $\lambda \geq 0$, $\eta \geq 0$, and  $\pi$ unrestrict be the dual variables associated to constraints \eqref{eq:virdemone}, \eqref{eq:bandwidth}, and \eqref{eq:onlyoneaux}, respectively. The reduced cost $r_{p}$ of each variable $z_{p}$ that covers the virtual link~$k$~is:
+
+\begin{align}
+  r_{p} = c_{p} B_{k} - \lambda_{k} - \sum\limits_{e \in p : e \in E^S} B_{k} \eta_{e}  - \sum\limits_{(v,s) \in p : (v,s) \notin E^S} \pi_{v,s}  \nonumber
+\end{align}
+
+Since $c_p$ is the number of edges on the path $p$, the equation above is equivalent to:
+
+\begin{align}
+  r_{p} = \sum\limits_{e \in p : e \in E^S} B_{k} (1 - \eta_{e}) - \sum\limits_{e \in p : e \notin E^S} \pi_e - \lambda_{k} \nonumber
+\end{align}
+
+Thus, the minimum reduced cost for the VNEP is obtained by solving the following problem:
+
+\begin{align}
+  \min_{ \forall k \in E^{V}, \forall p \in P^{k}}  \quad  \sum\limits_{e \in p : e \in E^S} B_{k} (1 - \eta_{e}) - \sum\limits_{e \in p : e \notin E^S} \pi_{e}-\lambda_{k} \nonumber
+\end{align}
+
+If we construct an auxiliary graph in which the cost of each path corresponds to its reduced cost, 
+the pricing problem consists in finding a path with the minimum cost, which can be solved polynomially.
+To this end, the dual variables obtained from the RMP optimal dictionary are used to construct an auxiliary graph.
+%Each column in the model corresponds to a path in the auxiliary graph.
+%At each iteration, for each virtual link $k = (v,w) \in E^V$, a shortest path is calculated in the auxiliary graph.
+%A path is composed of two auxiliary edges and a set of edges from the substrate graph.
+%To minimize the function above is equivalent to find a path in 
+For each virtual link $k = (u,v) \in E^V$, we construct an auxiliary graph in which auxiliary edges $(v,s)$ have a cost of $-\pi_{v,s}$ and substrate edges $e \in E^S$ have a cost of $B_{k}(1 - \eta_{e})$. 
+That way each path $p$ in that auxiliary graph between two auxiliary nodes $u$ and $v$ has a cost exactly equal to its reduced cost $r_p$.
+Thus to obtain the path with smallest reduced cost, we can use a polynomial algorithm to find the shortest path in the constructed auxiliary graph.
+
+The auxiliary graph is constructed in the following way:
+On top of the physical substrate graph, for each virtual node $v \in |V^V|$ an auxiliary node is added.
+Those auxiliary nodes are connected through auxiliary edges with all physical nodes that have enough capacity to host them.
+%Each virtual link $k = (u,v)$ becomes a commodity with demand $B_{k}$.
+%A solution for this problem is for each commodity $(u,v)$, a path between auxiliary nodes~$u$ and~$v$ with enough bandwidth capacity to host the virtual link.
+%Additionally, the first and last substrate nodes on the path define the virtual node mapping.
+%For example, if the virtual link~$(u,v)$ is mapped to a path composed of the auxiliary edge~$(u,s)$, the virtual node~$u$ is mapped to the physical node~$s$.
+%In order to the problem solution be feasible, all virtual links adjacent to~$u$ have to be mapped to paths that go through the same auxiliary edge, otherwise the node~$u$ would be mapped to more than one physical node.
+
+An auxiliary graph  built based on the instance from Figure~\ref{fig:input} is shown in Figure~\ref{fig:aux}. 
+Auxiliary nodes $a$, $b$ and $c$ are presented in gray. The node $a$ is linked to all nodes but node~$D$, which does not have enough capacity to host it. Two commodities are created: $(a,b)$, with demand $20$, and $(b,c)$, with demand $10$.
+%Therefore two paths have to be found with enough capacity to fulfil commodities demands. Additionally, all paths starting at node $b$ have to go through the same auxiliary edge, otherwise $b$ would be mapped to two distinct substrate nodes. 
+
+\begin{figure}[!h]
+  \centering
+  \caption{Auxiliary graph for the input instance of Figure~\ref{fig:input}.\label{fig:aux}}   
+\begin{tikzpicture}
+\usetikzlibrary{arrows}
+\usetikzlibrary{shapes}
+\tikzstyle{every node}=[draw, ellipse, minimum size=10pt,align=center,scale=0.7]
+\node[fill=gray!40] at (0,0)(6){b(10)};
+\node[below right=0.5cm of 6] (1){A (11)};
+\node[below left=1cm of 1](2){B (16)};
+\node[below right=1cm of 1](4){D (7)};
+\node[below=2cm of 1](3){C (11)};
+\node[fill=gray!40, right=0.5cm of 1] (5){a(10)};
+\node[fill=gray!40, above left=1cm of 2] (7){c(15)};
+\path[every node/.style={font=\sffamily\small},thick]
+    (5) edge[green,densely dotted] node [] {} (1)
+	edge[green,densely dotted] node [] {} (2)
+	edge[green,densely dotted] node [] {} (3)
+    (6) edge[green,densely dotted] node [] {} (1)
+	edge[green,densely dotted] node [] {} (2)
+	edge[green,densely dotted] node [] {} (3)
+    (7) edge[green,densely dotted] node [] {} (2)
+    (1) edge node [] {} (4)
+    (2) edge node [] {} (3)
+	edge node [] {} (1)
+    (4) edge node [] {} (3);
+\end{tikzpicture}
+\caption*{Source: from author (2015).}\end{figure}
+
+Paths in the auxiliary graph yield a valid column to the RMP if they respect some constraints.
+Suppose we have to find a path to map the virtual link $(u,v)$.
+First, the path has to contain exactly two auxiliary edges, that are the ones with endpoints in $u$ and $v$. This is easily enforced by setting a cost~$\infty$ to all auxiliary edges that connect auxiliary nodes other than $u$ or $v$.
+Second, a path in the auxiliary graph has to contain at least one substrate edge, 
+and the node adjacent to the source has to differ from the node adjacent to the target node. 
+If one of these two conditions are not satisfied it means that both auxiliary nodes are mapped to the same substrate node, which is a restriction of the problem.
+Hence, Dijkstra's algorithm cannot be directly applied to solve the pricing problem. 
+Figure~\ref{fig:subprob} shows an example of a pricing problem. 
+Auxiliary nodes are filled with gray and auxiliary edges are dotted. %The edges have costs associated with them.
+
+\begin{figure}[h]
+  \centering
+  \caption{Subproblem graph\label{fig:subprob}}
+\begin{tikzpicture}
+\usetikzlibrary{arrows}
+\usetikzlibrary{shapes}
+\tikzstyle{every node}=[draw, ellipse, minimum size=10pt,align=center,scale=0.7]
+\node at (0,0)(B){B};
+\node[right=1cm of B](D){D};
+\node[fill=gray!40,left=1cm of B](v){v};
+\node[below=1cm of v](A){A};
+\node[above=1cm of D] (C){C};
+\node[fill=gray!40,above=1cm of B] (w){w};
+\node[fill=gray!40, below=1cm of D](u){u};
+\path[every node/.style={font=\sffamily\small},thick]
+    (A) edge[green,densely dotted] node [above] {10} (u)
+    (B) edge node [left, above] {4} (C)
+  edge[green,densely dotted] node [left] {1} (w)
+	edge node [above] {3} (D)
+	edge node [left] {3} (A)
+	edge[green,densely dotted] node [right] {1} (u)
+	edge[green,densely dotted] node [above] {1} (v)
+    (C) edge node [left] {3} (D)
+  edge[green,densely dotted] node [above] {1} (w)
+  edge[green,densely dotted, bend left=60] node [right] {10} (u);
+\end{tikzpicture}
+\caption*{Source: from author (2015).}\end{figure}
+
+
+Suppose that we want to find a path between $u$ and~$v$ in the auxiliary graph.
+The minimum-cost path in the graph $u - B - v$ does not contain any substrate edge and then is invalid.
+The path $u - B - D - C - B - v$ is also invalid, because both~$u$ and $v$ are mapped to the same substrate node $B$.
+The path $u - C - w - B - v$ is invalid because it uses auxiliary edges not connected to $u$ or $v$.
+Therefore the minimum-cost valid path in the graph is $u - A - B - v$, where
+node $u$ is mapped to $A$ and $v$ to $B$, and virtual link~$(u,v)$ is mapped to~$(A,B)$.
+Note that the edge $(w,B)$ has a cost of $\infty$, so no path could use this auxiliary edge.
+
+\section{Proposed Modified Dijkstra Algorithm}
+We  propose a modified Dijkstra's algorithm (Algorithm~\ref{alg:dij}) to find a valid path with the minimum reduced cost.
+It works as multiple Dijkstra's algorithms running in parallel.
+Each node to be visited is associated with an origin, i.e. the first physical node in the path.
+Initially all neighbors of the source node~$s$ are added to the priority queue $Q$, with an origin equal to itself.
+At each iteration the node in the queue with the minimum distance is selected to be visited.
+When the node~$v$ with origin~$w$ is visited, its neighbors are added to the queue with an origin~$w$ if it the cost of reaching the neighbor through $v$ is smaller than its current distance.
+Hence the same node can be added multiple times if it is reached from different origins.
+But the algorithm is still polynomial since the number of times each node will be visited is bound by the degree of~$s$.
+The target~$t$ can only be added when the path contains at least one physical edge, this is detected by checking if the origin of the node is equal to itself.
+The algorithm stops when the target node~$t$ is visited.
+
+\begin{algorithm}
+%\scriptsize
+  \KwIn{Let $s$ be the source node, and $G^A = (V^A, E^A)$ be the auxiliary graph, and $c(u,v)$ the cost of the edge $(u,v)$.}
+\KwOut{$d[v,w]$ is the cost of the minimum cost path from $s$ to $v$ with origin $w$.}
+initialize every $d$ as $\infty$\;
+\ForEach{edge $(s,v) \in E^{A}$}
+{$d[v,v] := c(s,v)$\;
+  $Q := Q \cup \{(v,v)\}$\;
+}
+\While{$Q$ is not empty}
+  {$(u, origin) := extract\_min(Q)$\;
+  \If{u = t}{return best path with cost $d[u,origin]$\;}
+    \ForEach{edge $(u,v) \in E^{A}$}
+    {\If{$v = t$ and $u = origin$}{continue\;}
+      \If{$d[v,origin] < d[u, origin] + c(u,v)$}
+      {$d[v, origin] := d[u, origin] + c(u,v)$\;
+        \eIf{$(v,origin) \in Q$}
+        {decrease cost of $(v,origin)$ in $Q$\;}
+        {$Q := Q \cup \{(v,origin)\}$\;}
+      }
+    }
+  }
+\caption{Modified Dijkstra's Algorithm}
+\label{alg:dij}
+\end{algorithm}
+
+\begin{proposition} The Modified Dijkstra's Algorithm finds a valid path to the problem with the smallest cost in the auxiliary graph in polynomial time.
+\end{proposition}
+\begin{proof}
+  At each moment the set of nodes that were already visited have the shortest distance from the source node.
+  A node is not visited more than its indegree, i.e., the number of arcs incoming that node.
+  Suppose a node $u$ with cost $d$ that was already visited is adjacent to a node $v$ being visited with cost $d' < d$.
+  This is an impossible situation because if $u$ has distance $d'<d$ it would be visited before $u$.
+  So once a node is visited it has the smallest possible distance from the source.
+  Thus once the target node $t$ is visited it has the smallest possible distance from the source.
+
+  Moreover, the algorithm has to find the shortest distance taking into account the aforementioned constraints.
+  With this aim, the target node $t$ can only be added to the queue if its predecessor is not equal to its origin.
+  In that way the path obtained by this algorithm always contains at least one physical edge. Additionally, since there are no edges with negative costs, the path obtained does not contain a loop.
+  This algorithm is polynomial and corresponds to run a Dijkstra algorithm for each node adjacent to the source node of $s$.
+  Theoretically, this algorithm has a time complexity of $O(|E^S||V^S| + |V^S|^2log|V^S|)$ with Fibonacci heaps, and $O(|V^S||E^S|log|V^S|)$ with binary heaps.
+\end{proof}

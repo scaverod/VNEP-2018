@@ -1,0 +1,60 @@
+Graph approx {
+  model="subset"
+  rankdir= "TB";
+  subgraph cluster_substrate {
+    K=1010;
+     label = "Physical Susbtrate Network";
+     {rank=same; 
+       a [label="3"];
+       b [label="3"];
+       c [label="3"];
+     }
+    {rank=same;
+      d[label="1"]; e[label="1"]; 
+    }
+    {rank=same;
+      g[label="1"]; h[label="1"];
+    }
+    {rank=same;
+       x [label="2"]; 
+       y[label="2"]; 
+       z[label="2"]; 
+    }
+  }
+
+  a -- d
+  a -- e
+  b -- d
+  b -- e
+  c -- d
+  c -- e
+
+  d -- g [label="8"]
+  e -- h [label="8"]
+
+  g -- x
+  g -- y
+  g -- z
+  h -- x
+  h -- y
+  h -- z
+
+  subgraph cluster_virtual {
+    label = "Virtual Network";
+    {rank=same; 
+      "a'" [label="3"];
+      "b'" [label="3"];
+      "c'" [label="3"];
+    }
+    {rank=same; 
+      "x'"[label="2"]; 
+      "y'"[label="2"]; 
+      "z'"[label="2"]; 
+    }
+  }
+  "a'" -- "x'" [label = "3"]
+  "b'" -- "y'" [label = "4"]
+  "c'" -- "z'" [label = "8"]
+  "a'" -- "b'" -- "c'"
+}
+

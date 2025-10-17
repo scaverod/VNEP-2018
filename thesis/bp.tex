@@ -1,0 +1,90 @@
+\chapter{Branch \& Price}
+\label{ch:bp}
+
+The column generation (CG) algorithm solves only the linear relaxation of the problem.
+To obtain integer solutions for the VNEP, CG is embedded in a Branch \& Bound algorithm (B\&B).
+A B\&B algorithm where each node is solved through a column generation is called Branch \& Price (B\&P).
+
+We implemented a classic B\&P procedure which is summarized in Algorithm~\ref{alg:bp}.
+Initially, the relaxation of the problem is solved.
+If the optimal solution is not integral, the problem is split into two subproblems.
+This process is called branching (Section~\ref{sec:branching}).
+These subproblems are inserted in a priority queue with the key set to their relaxation value.
+At each iteration, a subproblem is selected (Section~\ref{sec:nodesel}) from the queue and solved through a CG algorithm.
+To speed up the algorithm by improving upper bounds, a constructive solution is build at each iteration (Section~\ref{sec:heur}) aiming to obtain an integral solution.
+In case the incumbent integral solution has a better objective value than a subproblem relaxation, that branch is not expanded anymore since the relaxation of the problem is a lower bound on the integral solution.
+
+\begin{algorithm}[t]
+\caption{Branch \& Price Algorithm}
+$Q$ = {relaxation of IP}
+
+\While{$Q$ is not empty}
+  {
+    subproblem = select\_node($Q$)\; \label{alg:genbp:snode}
+    $x^*$ = solve subproblem using column generation\;
+    \If{feasible($x^*$) and $\phi(x^*) < UB$}
+    {\eIf{$x^*$ is integral}
+      {$UB = \phi(x^*)$\;}
+      {build heuristic solution\;
+      split subproblem into subproblems and add them to $Q$\;\label{alg:bp:split}}
+    }
+  }
+\label{alg:bp}
+\end{algorithm}
+
+The problems are branched with the introduction of cuts. Those cuts can turn the problem infeasible. 
+New columns have to be inserted in order to make the problem feasible again.
+The two-phase approach explained in Chapter~\ref{ch:cg} is used to overcome this problem.
+
+Next we describe decisions taken by the B\&B for the VNEP we have implemented.
+
+\section{Branching}
+\label{sec:branching}
+%A solution is fractional if one or more variables have a fractional value.
+When expanding a node of the B\&B tree, if the solution is fractional, a variable is selected to be branched (Section~\ref{sec:varsel}).
+The model solved at each node has two sets of decision variables: node mapping variables $x_{v,s}$ and path mapping variables $z_{p}$.
+The former has a fixed size, while the latter grows during B\&P execution.
+Therefore each one is treated differently. 
+
+\subsection{Variable Selection}
+\label{sec:varsel}
+Variables $x_{v,s}$ are intregralized first starting with variable with values closest to $0.5$.
+Once all variables $x$ are integral, path variables $z_{p}$ are verified in order of the origin node label.
+Paths with the same origin are verified in the order they were generated. 
+
+\subsection{Node mapping branching}
+We tested two methods of branching for variables $x_{v,s}$.
+In the first, two subproblems are created, one for which the substrate node $s$ is forbidden of hosting $v$ ($x_{v,s} \leq 0$) and another for which the node $s$ is forced to host $v$ ($v_{v,s} \geq 1$).
+The second is called Generalized Upper Bound (GUB):
+since $\sum\limits_{s' \in V^S} x_{v,s'} = 1$, one can cut more than one variable at a time. Two problems are created, one of which half the variables $x_{v}$ are forbidden by adding the cut $\sum\limits_{s < |V^S| / 2} x_{v,s} \leq 0$, and another for which the other half of variables are forbidden.
+In both methods, the addition of cuts affect the pricing problem.
+The auxiliary edge $(v,s)$ is either forbidden or fixed accordingly.
+
+\subsection{Path branching}
+Branching of path variables is not as straightforward as branching node variables. 
+Individually branching on path variables would yield a large number of nodes to explore, since the number of paths grows exponentially with the size of the instance. 
+To avoid this problem, paths are branched by introducing constraints that simulate restrictions on variables $y$ from the compact model. 
+Suppose that for a given node, there exists one path variable $z_{p}$ that has a fractional value. Then there must be at least another variable $z_{p'}$ that is also fractional, since the sum of the variables that cover a virtual link is $1$. 
+The paths $p$ and $p'$ associated to variables $z_{p}$ and $z_{p'}$ must have at least two different substrate edges $e \in p, e \notin p'$ and $f \in p', f \notin p$, otherwise they would be the same path. Then, two branches are generated, one with $e$ forbidden to belong to the path, and another for which $f$ is forbidden. Edges are not fixed, because it is easier to find a path that does not use multiple edges (it suffices to set their weights to a large value) than it is to fix edges. An edge $e$ is forbidden to be used to cover the virtual link $k$ by adding the cut $c(k,e) = \sum\limits_{p \in P^k} \delta_{e,p} z_p \leq 0$.
+
+Adding these cuts affects the pricing problem. For each $k \in E^V$ and $e \in E^S$ a dual variable $\psi_{k,e}$ associated with the cut $c(k,e)$ is created. The values of these variables are added to the cost of each edge in the auxiliary graph. So each physical edge in the auxiliary graph has the cost $B_{k}(1 - y_{e} - \psi_{k,e})$.
+
+\section{Node Selection}
+\label{sec:nodesel}
+The order in which active nodes are visited affects the performance of the algorithm. A balance has to be found between finding good upper bounds and visiting promising nodes. We tested three approaches: Depth First Search (DFS), Best First Search (BFS), and Best Projection (BPJ). DFS visits nodes in the order they are created. BFS visits first the most promising nodes, i.e., nodes with the lowest dual bound. BPJ visits nodes with fewer fractional variables first, since they are possibly closer to an integral solution.
+
+\section{Heuristic Solution}
+\label{sec:heur}
+It was seen in Section~\ref{sec:complexity}, that to obtain a feasible solution for the VNEP is NP-Hard.
+Nevertheless, a greedy algorithm can be applied and in many situations is able to find a feasible solution.
+Moreover, if part of the solution is already fixed, only the remaining part has to be constructed.
+This happens when a greedy solution is applied on a subproblem, which uses all variables set on that branch of the B\&B tree since the root node.
+Constructed feasible solutions can improve upper bounds allowing to prune entire branches of the B\&P search tree.
+
+A solution obtained by the column generation may contain several fractional variables. 
+The values of those variables contain valuable information about the problem. 
+Each virtual node $v$ is mapped to the free physical node $s$ for which the value of $x_{v,s}$ is the largest. 
+After all nodes are mapped, a breadth first search is used to map virtual links to paths in the physical substrate graph. The mapping of edges can fail if no path with enough bandwidth is found.
+
+This algorithm is applied at each node of the B\&B tree. If a feasible solution is successfully built by the constructive heuristic algorithm, and the obtained solution is better than the current upper bound, the incumbent solution is updated.
+

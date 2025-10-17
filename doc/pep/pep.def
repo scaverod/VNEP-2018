@@ -1,0 +1,40 @@
+%\ProvidesFile{pep.def}[2002/11/14 Plano de Estudos e Pesquisa]
+%\newcommand{\titlepagespecificinfo}{Plano de Estudos e Pesquisa}
+\DeclareRobustCommand{\titlepagegeneralinfo}{
+	\vfill
+
+	PLANO DE ESTUDO E PESQUISA - PEP \\
+
+	\vfill
+
+	{\large\@title \\}
+
+	\vfill
+
+	\begin{table}[h]
+
+		\centering
+		\begin{tabular}{c}
+	
+			\hline
+			\@authora \\
+			(Mestrando) \\
+		
+			\\ \\ \\
+
+			\hline
+			\@advisor \\
+			(Orientadora) \\
+
+			\\ \\ \\
+
+			\@ifundefined{@coadvisor}{}{
+				\hline
+				\@coadvisor \\
+				(Co-Orientador)\\
+			}
+
+		\end{tabular}
+	
+	\end{table}
+}

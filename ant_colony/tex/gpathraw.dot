@@ -1,0 +1,19 @@
+Graph {
+  node [color=grey,style=filled]
+  s; t;
+  4;
+  subgraph cluster_inter {
+  color=white;
+  3; 
+  
+  2; 
+  
+  1;
+  }
+  s -- 1 [label=45,color=red]
+  s -- 2 [label=68]
+  s -- 3 [label=100,color=blue]
+  3 -- t [label=20,color=blue]
+  1 -- 4 [label=40,color=red]
+  4 -- t [label=35,color=red]
+}

@@ -1,0 +1,38 @@
+Graph example {
+  //ratio = "0.8";
+  node [width="0.5"]
+  center=true;
+    {rank=1;
+      a [label="a (11)"];
+    }
+    {rank=same; 
+      b [label="b (7)"];
+      d [label="d (16)"];
+    }
+    c [label="c (11)"];
+
+  a -- b [label="10"]
+  b -- c [label="5"]
+  {
+  node [shape=box]
+  { p1 [label="p1 (10)", style="filled, fillcolor=gray"];
+    p2 [label="p2 (10)", style="filled, fillcolor=gray"]; 
+    p3 [label="p3 (15)", style="filled, fillcolor=gray"];
+  }
+  }
+  p1 -- c [color="blue", style="dashed", penwidth="7"]
+  p2 -- a [color="blue", style="dashed", penwidth="7"]
+  p2 -- a [color="red", style="dotted", penwidth="7"]
+  p3 -- d [color="red", style="dotted", penwidth="7"]
+
+  // mapping 
+  //p2 -- a [style="dashed"]
+  //p3 -- d [style="dashed"]
+  //p1 -- c [style="dashed"]
+
+  a -- d [color="blue", style="dashed", arrowhead="none", penwidth="7"]
+  a -- d [color="red", style="dotted", penwidth="7"]
+  d -- c [color="blue", style="dashed", penwidth="7"]
+
+}
+

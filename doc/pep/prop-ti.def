@@ -1,0 +1,33 @@
+%===============================================================================
+% prop-ti.def - definicoes para Propostas de TI
+%
+% versao 1.0 - 07/ago/2001 (pilla)
+%===============================================================================
+
+%
+% folha de rosto
+%
+\DeclareRobustCommand{\titlepagegeneralinfo}{%
+	\vfill
+
+	{\large\@title \\}
+
+	\vfill
+
+	PROPOSTA DE TRABALHO INDIVIDUAL \\
+	\vspace{2ex}
+	por \\
+	\vspace{6ex}
+	\MakeUppercase{\@authora} \\
+
+	\vfill
+
+	\@advisor \\
+	Orientador \\
+	\vfill
+        \@ifundefined{@coadvisor}{}{
+                \vfill
+                \@coadvisor\\
+                Co-orientador\\
+        }
+}

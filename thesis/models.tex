@@ -1,0 +1,107 @@
+\chapter{Models}
+
+The VNEP can be modelled as the following Integer Programming model: let the decision variables $x_{v,s} = 1$ iff the substrate node $s$ hosts the virtual node $v$. And let $y{v,w,s,j} = 1$ iff the physical link $(s,j)$ hosts the virtual link $(v,w)$.
+
+\begin{align}
+    \min & \sum\limits_{(s,j) \in E^{S}} \sum\limits_{(v,w) \in E^{V}} B_{v,w} y_{v,w,s,j} \nonumber \\
+    s.t. & \sum\limits_{v \in V^{V}} C_{v} x_{v,s} \leq C_{s}                     & \forall s \in V^{S}  \label{eq:flowcap} \\
+    & \sum\limits_{s \in V^{S}} x_{v,s} = 1                                  & \forall v \in V^{V}  \label{eq:flowvirone}\\
+         & \sum\limits_{v \in V^{V}} x_{v,s} \leq 1                               & \forall s \in V^{S} \label{eq:flowsubone}\\
+         & \sum\limits_{j \in V^{S}} y_{v,w,s,j} - \sum\limits_{j \in V^{S}} y_{v,w,j,s} =  x_{v,s} - x_{w,s}  & \forall (v,w) \in E^{V}, s \in V^{S}\label{eq:flowflow} \\
+         & \sum\limits_{(v,w) \in E^{V}} B_{v,w} y_{v,w,s,j} \leq B_{s,j}  & \forall (s,j) \in E^{S} \label{eq:flowbandwidth} \\
+         & x_{v,s} \in \{0,1\} & \forall v \in V^{V}, s \in V^{S} \\
+         & y_{k,l,m,n} \in \{0,1\} & \forall (k,l) \in E^{V}, (m,n) \in E^{S}
+\end{align}
+
+Constraints~\eqref{eq:flowcap} ensure that the capacities of substrate nodes are not surpassed. Constraints~\eqref{eq:virone} and~\eqref{eq:subone} enforce, respectively, that every virtual node is mapped to a different substrate node and every substrate node hosts at most one virtual node. Constraints~\eqref{eq:flowflow} are path constraints, they ensure that every virtual link is mapped to a path in the substrate graph. Finally, Equations~\eqref{eq:bandwidth} guarantee that the bandwidth capacities of the physical edges are not violated.
+
+\section{Dantzig-Wolfe Decomposition}
+Following the classical approach summarized by \cite{Lubbecke:04}, for every virtual link $k = (v, w) \in E^V$, let $G^k$ be:
+
+\begin{align}
+  G^k = \{ y_{k} : \text{ $y_{k}$ is a path}, C_{h(y)} \leq C_{v}, C_{t(y)} \leq C_{w} \}
+\end{align}
+
+Where $h(y)$ is the first node on the path represented by $y$, and $t(y)$ is the last. Therefore, $G^k$ is the set of values of $y$ that are a path and of which respect the cpu capacity of the nodes.
+
+%Decision variables $y$ can be defined in terms of paths in the substrate graph. 
+
+We can write every $y \in G^K$ as a convex combination of extreme points~$\{\delta_p\}_{p \in P^k}$ plus \todoc{extreme rays are not needed because the problem is defined by a polytope, argument that binary vector do not need rays} non-negative combination of extreme rays.
+Let $P^k$ be the set of all paths in the physical network that cover the virtual link $k$.
+
+\begin{align}
+  y_{k} = & \sum\limits_{p \in P^{k}} \delta_{p} z_{p} \label{eq:yk} & \\
+        %& x_{v,s} = \sum\limits_{(v,w) \in E^V} \sum\limits_{p \in P^{(v,w)}} \delta_{v,s,p} z_{p}
+          & \sum\limits_{p \in P^k} z_{p} = 1 & \forall k \in E^V \\
+          & z_{p} \in \{0,1\}                       & \forall k \in E^V, p \in P^k
+\end{align}
+
+%\begin{align}
+%  s.t.  & \sum\limits_{p \in P^{k}} z_{p} = 1, z_{p} \geq 0 
+%\end{align}
+
+Therefore, each variable $y_{v,w,s,j}$ is uniquely defined in terms of paths in the graph as follows:
+
+\begin{equation}
+  y_{v,w,s,j} = \sum\limits_{p \in P^{(v,w)}} \delta_{s,j,p} z_{p} \label{eq:definition}
+\end{equation}
+
+If we replace the path variables in Constraints~\ref{eq:flowflow}:
+
+\begin{align}
+  \sum\limits_{j \in V^{S}} \sum\limits_{p \in P^k} \delta_{s,j,p} z_{p} - \sum\limits_{j \in V^{S}}\sum\limits_{p \in P^k} \delta_{j,s,p} z_{p} = x_{v,s} - x_{w,s}     & \quad \forall (v,w) = k \in E^{V}, s \in V^{S} \label{eq:flowwithpathvar}
+\end{align}
+
+Let $p = v_{1},v_{2},\ldots,v_{k}$ be a path in the substrate graph. Since $p$
+is an undirected path in a graph, with exception of $j = v_{1}$ and $ j = v_{k}$,
+the right hand side of the above equation is equal 
+to zero. So this equation is equivalent to:
+
+\begin{align}
+  \sum\limits_{p \in P^k : (v,s) \in p} z_{p}
+    - \sum\limits_{p \in P^k : (s,w) \in p} z_{p} 
+    = x_{v,s} - x_{w,s}   
+    & \quad \forall (v,w) = k \in E^{V}, s \in V^{S} \nonumber % \label{eq:flowwithpathvar}
+\end{align}
+
+If for every $v \in V^S$ we sum the equation above we obtain:
+
+\begin{align}
+  \sum\limits_{(v,w) = k \in E^{V}}\sum\limits_{p \in P^k : (v,s) \in p} z_{p}
+    - \sum\limits_{(v,w) = k \in E^V}\sum\limits_{p \in P^k : (s,w) \in p} z_{p} & \nonumber \\
+    = |\delta(v)| x_{v,s} - \sum\limits_{(v,w) \in E^{V}} x_{w,s}       & \quad \forall v \in V^{V}, s \in V^{S} \label{eq:aggreg}
+\end{align}
+
+Since by Equation~\ref{eq:flowsubone} and by the integrality property of the decision variables, the right
+hand-side of the equation can be either zero or one. The equation holds in both of those cases.
+If it is zero, the right hand side of \eqref{eq:flowwithpathvar} is non-negative, so
+the left hand-side of that equation is also non-negative. If it is one, the left hand-side
+can be at most one, so the equation also holds, therefore in all cases the equation is positive.
+Therefore the left-hand side of \eqref{eq:aggreg} is always smaller than the right hand side and the 
+Equation~\eqref{eq:final} holds for any $M \geq \delta(v)$.
+
+
+\begin{align}
+    \sum\limits_{(v,w) \in E^{V}} x_{w,s} = 
+    \sum\limits_{(v,w) = k \in E^{V}}\sum\limits_{p \in P^k : (s,w) \in p} z_{p} & \quad \forall v \in V^{V}, s \in V^{S}
+\end{align}
+
+\begin{align}
+  \sum\limits_{k \in E^{V}}\sum\limits_{p \in P^k : (v,s) \in p} z_{p} \leq M x_{v,s}       & \quad \forall v \in V^{V}, s \in V^{S}
+  \label{eq:final}
+\end{align}
+
+Therefore, replacing variables $y$ by the new decomposed variables $z$ we obtain a new model, the Column Generation model, called CG:
+
+\begin{align}
+  \min  & \sum\limits_{k \in E^{V}}\sum\limits_{p \in P^k}  c_{p} B_k z_{p} \label{eq:obj} \\
+        & \sum\limits_{s \in V^{S}} x_{v,s} = 1                                  & \forall v \in V^{V} \label{eq:virone} \\
+        & \sum\limits_{v \in V^{V}} x_{v,s} \leq 1                               & \forall s \in V^{S} \label{eq:subone} \\
+        & \sum\limits_{k \in E^{V}}\sum\limits_{p \in P^{k}} \delta_{e,p} B_{k} z_{p} \leq B_{e} & \forall e \in E^{S} \label{eq:bandwidth} \\
+        & \sum\limits_{k \in E^{V}}\sum\limits_{p \in P^k} \delta_{v,s,p} z_{p} \leq M x_{v,s} & \forall v \in V^{V}, s \in V^{S} \label{eq:onlyoneaux}\\
+        & \sum\limits_{p \in P^{k}} z_{p} = 1                                    & \forall k \in E^{V} \label{eq:virdemone} \\
+        &  x_{v,s} \in \{0,1\}  & \forall v \in V^{V}, s \in V^{S} \nonumber \\
+        & z_{p} \in \{0,1\}    & \forall p \in {P} \nonumber
+\end{align}
+
+Solving the problem using decomposition introduces a large number of new variables. However we can obtain better bounds and take advantage of our ability to solve the subproblem efficiently.

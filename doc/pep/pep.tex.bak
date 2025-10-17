@@ -1,0 +1,237 @@
+\documentclass[pep,twoside,portuguese]{iiufrgs}
+
+% Definição de Pacotes.
+\usepackage[
+		pdfauthor={André Grahl Pereira},
+		pdftitle={Explorando os Limites de Solução em Abstração do Problema de Planejamento de Movimento com Ações de Puxar},
+		pdfstartview=FitH
+	]{hyperref}	% Pacote para propriedades do documento.
+
+\usepackage[brazilian]{babel}			% Linguagem.
+\usepackage[english]{babel}				% Linguagem.
+\usepackage[T1]{fontenc}					% Conjunto de caracteres correto.
+\usepackage[latin1]{inputenc}			% Acentuação.
+\usepackage{graphicx}         	% Pacote para importar figuras.
+\usepackage{color}            	% Pacote para se trabalhar com cor no texto.
+\usepackage{times}            	% Pacote para usar fonte Adobe Times.
+\usepackage{multirow}	      	% Pacote para utilização de várias linhas em uma tabela.
+\usepackage{multicol}	      	% Pacote para utilização de várias colunas em uma tabela.
+\usepackage{url}	      	% Pacote para utilização de URLs.
+\usepackage{float}
+\usepackage{enumerate}
+
+\hypersetup{colorlinks,
+		citecolor=black,
+		filecolor=black,
+		linkcolor=black,
+		urlcolor=black
+	}						% Definição das cores dos hiper-links.
+	
+
+% Definição de Variáveis
+\title{Explorando os Limites de Solução do Problema de Planejamento de Movimento com Ações de Puxar}
+
+\advisor[Profa. Dra.]{Luciana Salete Buriol\\buriol@inf.ufrgs.br}
+
+\author{André Grahl Pereira\\agpereira@inf.ufrgs.br}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Palavras-chave
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\keyword{planejamento de movimento}
+\keyword{busca heurística}
+\keyword{solução de \textit{puzzles}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Início do Documento
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Folha de rosto
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Índice
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\tableofcontents
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Resumo - 1 Páginas
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{abstract}
+    Neste plano de estudos e pesquisa será estudada uma variação do problema de planejamento de movimento com ações de puxar. Esse problema pode ser visto como uma variação do \textit{puzze} Sokoban, sendo que o agente não pode executar ações de empurrar e sim de puxar. Esse problema foi previamente estudado por \cite{Ritt2010} provando sua complexidade considerando o objetivo de caminho. Nesse plano tem-se como objetivo preliminar propor um conjunto de instâncias semelhante ao conjunto existente para o Sokoban. Para isso será proposto um método de criação e adaptação de instâncias. O objetivo principal é centrado em estabelecer os limites de solução dessa variação adaptando técnicas algorítmicas existentes na literatura de Sokoban e de outros \textit{puzzles}, bem como com a propostas de técnicas especificas do domínio.
+\end{abstract}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Seção: Introdução e Motivação - 2 a 3 Página
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Introdução e Motivação}
+
+\section{Introdução}
+
+\subsection{Definição do Problema}
+
+Sokoban é um \textit{puzzle}, no entanto pode ser visto como uma variação de abstração do problema de planejamento de movimento. Esse \textit{puzzle} de empurrar blocos tem como entrada uma configuração de blocos $1 \times 1$ e um conjunto de posições objetivo. Um dos blocos é diferenciado como empurrador, robô ou \textit{warehouse keeper}. Um movimento consiste em mover o empurrador uma unidade vertical ou horizontalmente. Se um bloco móvel ocupa a posição destino do empurrador o bloco é então empurrado para o espaço adjacente, se o espaço adjacente estiver vazio, gerando um espaço vazio para o empurrador. Caso contrário o movimento não é válido. Alguns blocos são barreiras e não podem ser movidos. O objetivo é realizar uma sequência de movimentos de forma que existe um bloco móvel, diferente do empurrador, em cada posição objetivo (versão de armazenamento).
+
+Na Figura \ref{fig:instance1legend} pode-se observar os diferentes componentes do problema. Na posição \textit{iL} temos o empurrador. Na posição \textit{cF} um exemplo de bloco móvel. Já na posição \textit{gQ} uma posição objetivo. Por fim \textit{bG} corresponde a um espaço vazio e \textit{aE} a uma barreira.
+
+\begin{figure}[h]
+    {
+	    \centering
+    	\includegraphics[height=2.5in]{instance_1_legend}
+	    \center\caption{Instância \#1 do conjunto padrão xSokoban \cite{Junghanns1999}.}
+    	\label{fig:instance1legend}
+    }
+\end{figure}
+
+\subsection{Variações e Classes de Complexidade}
+
+A resolução deste problema é de interesse da área de algoritmos e muitas variações do Sokoban vem sendo estudadas. Nessas variações o empurrador pode mover um número \textit{k} de blocos móveis ou mesmo um número ilimitado de blocos. Podem não existir barreiras. Em outras variações os blocos móveis após empurrados continuam deslizando até colidir com um obstáculo. Ainda há variações em que o objetivo consiste em mover o empurrador até uma determinada posição objetivo (versão de caminho).
+
+Neste plano será estudada a variação \textit{Pull}-1-F considerando o problema de armazenamento. A palavra \textit{Pull} define que movimentos de puxar podem ser realizados. O número seguido da palavra indica quantos blocos podem ser movidos em cada movimento e a letra F indica que barreiras são permitidas. A variação \textit{Pull}-1-F aqui será nomeada por Pullban.  No trabalho  de \cite{Ritt2010} é provada que a complexidade da variação \textit{Pull}-1-F considerando o objetivo de caminho é NP-\textit{hard}, a complexidade da versão que considera o problema de armazenamento permanece em aberto.
+
+\subsection{Algoritmos e Soluções}
+
+Busca possui um importante papel em computação desde o seu início, sendo considerada uma abordagem central para resolução de problemas. Possui importantes aplicações tais como planejamento de ações e movimento, robótica, verificação de software e hardware, prova de teoremas e em biologia computacional \cite{Edelkamp2012}. No entanto tais aplicações necessitam mais do que algoritmos de busca baseados em força bruta. São necessárias técnicas capazes de eliminar grandes regiões do espaço de busca, para assim tornar esses problemas factíveis de serem resolvidos em tempo aceitável. Neste trabalho uma abstração do problema de planejamento de movimento real é usada para o desenvolvimento de técnicas algorítmicas que tem como objetivo de tornar os algoritmos de busca mais eficientes.
+
+Sokoban é a variação originalmente estudada pela comunidade científica. Dado que existe apenas um trabalho que estuda o Pullban e que a maioria dos estudos realizados para Sokoban podem ser adaptados para o Pullban. A literatura existente para o Sokoban será usada como referência. Sokoban é considerado um \textit{puzzle} difícil, pois apresenta um fator de ramificação grande e variável, soluções profundas na árvore de busca. Técnicas que estimam um limitante inferior são complexas e caras computacionalmente, o espaço de busca é direcionado o que leva a estados sem solução além de apresentar um espaço de busca semelhante a um cenário do mundo real\cite{Junghanns1999}. Assim esse \textit{puzzle} se apresenta como um excelente domínio de experimentação em novos algoritmos e técnicas de busca, sendo dessa forma explorado em várias pesquisas. Existe um conjunto de instâncias padrão\footnote{xSokoban - \url{http://www.cs.cornell.edu/andru/xsokoban.html}} usado para comparação dos trabalhos. Esse conjunto é composto por 90 instâncias com variados graus de dificuldade. Um exemplo de uma das instâncias pode ser observado na Figura \ref{fig:instance1legend}.
+
+Várias abordagens para resolução de instâncias do Sokoban são propostas na literatura: em 1993 na dissertação de mestrado de James \cite{Junghanns1999}, Sokoban é usado para mostrar as limitações da técnica de criação automática de macro movimentos, sendo capaz de resolver apenas a instância \#1 do conjunto padrão usando duas horas de CPU. Edelkamp \cite{Edelkamp1999} na sua tese de doutorado em 1999, desenvolveu um solver capaz de resolver 13 instâncias do conjunto padrão utilizando um algoritmo de decomposição para detectar \textit{deadlocks} estáticos e sofisticadas estruturas de dados para encontrar padrões mínimos de \textit{deadlocks}. A comunidade japonesa apresenta um grande desenvolvimento na construção de solvers de Sokoban. Em 1997 \cite{Nakayamaand1997} desenvolveram um solver baseado em A* usando heurísticas não admissíveis capaz de resolver 25 problemas do conjunto padrão, Sokoban Laboratory \cite{Junghanns1999} é um programa construído para criação de problemas de Sokoban que também possui um solver acoplado. Esse solver foi capaz de resolver 55 instâncias do conjunto padrão usando um algoritmo de busca \textit{best-first}.
+
+Os trabalhos publicados por Andreas Junghanns \cite{JunghannsS97, JunghannsS981, JunghannsS982, JunghannsS983, JunghannsS991, JunghannsS012, JunghannsS011} juntamente com sua tese de doutorado \cite{Junghanns1999} são um marco no esforço científico no problema de busca aplicado ao Sokoban. No seu trabalho é desenvolvido o solver Rolling Stone baseado em \textit{Iterative Deepening} A* utilizando vários aprimoramentos independentes e dependentes de domínio tais como: movimentos macros, busca de padrões, tabela de transposição, um limitante inferior eficaz, ordenação de movimentos e tabelas de \textit{deadlocks}. Esse esforço de desenvolvimento ainda é o estado da arte, sendo o solver descrito cientificamente capaz de resolver 59 instâncias de forma não ótima e 29 de forma ótima do conjunto padrão, em ambos os casos o maior número descrito na literatura. O limite de 20 milhões de nós explorados foi usado como critério de parada para os experimentos.
+
+Na dissertação de mestrado \cite{Virkkala2011} é descrita uma revisão bibliográfica das técnicas aplicadas ao domínio do Sokoban, ainda são realizados alguns experimentos modificando técnicas exploradas anteriormente. No trabalho \cite{Demaret2008} os autores descrevem uma estratégia de planejamento hierárquico juntamente com busca de padrões para resolução de instâncias de Sokoban. Usando essa estratégia foi possível resolver 54 instâncias do conjunto padrão de forma não ótima, o limite usado para o termino foi o de 8 horas por instância. Em \cite{Schaul2005} é proposta uma abordagem evolucionária de aprendizagem de conceitos aplicados a resolução Sokoban que é capaz de resolver instâncias simples do problema. Edelkamp \cite{Edelkamp2001} explora uma abordagem de planejamento baseado em banco de dados padrões independente de domínio aplicado a diferentes problemas entre eles instâncias pequenas de Sokoban mostrando resultados significativos. Na tese de doutorado de Botea \cite{Botea2006} é desenvolvido um solver que usa abstrações para planejamento em Sokoban sendo capaz de resolver dez instâncias que foram selecionados do conjunto padrão.
+
+Além de pesquisas científicas relacionados ao Sokoban existe uma forte comunidade de programadores que tem por objetivo desenvolver solvers cada vez mais eficientes para Sokoban, sendo esse desenvolvimento não é descrito cientificamente. Duas das principais técnicas propostas pela comunidade são a poda PI-Corral e a heurística \textit{packing order}. A documentação disponível para essas técnicas reside basicamente em comentários contidos nos códigos que as implementam. No entanto essas técnicas produzem os melhores resultados em termos da quantidade de instâncias de Sokoban que podem ser resolvidas de forma não ótima, três programas que implementam essas técnicas são o YASS \cite{Damgaard2012} de código aberto capaz de resolver 75 instâncias, JSoko \cite{Meger2012} também de código aberto capaz de resolver 65 instâncias e Takaken \cite{Takaken2012} de código fechado sendo o melhor resultado conhecido, capaz de resolver 86 das 90 instâncias. No entanto comparar esses resultados com os descritos na literatura é difícil, pois nos dados relatados não é explicitado qual foi limite imposto nos experimentos quanto a número de nós explorado ou tempo de teste.
+
+Outra linha de pesquisa relacionada é a geração automática de problemas de Sokoban. No trabalho de \cite{Murase1996} é proposta uma abordagem para criação de instâncias difíceis de Sokoban limitadas a mapas pequenos ($8 \times 8$) e com até três blocos móveis. O autores classificam o trabalho como uma forma de criar arte através de computadores. Em outro trabalho \cite{Masaru2003} é proposta uma abordagem para criação de \textit{goal-areas} e em \cite{Taylor2011} são apresentados os resultados da criação de um programa que expande a ideias propostas por \cite{Murase1996}. Nesse trabalho são criados mapas com até cinco blocos móveis e tamanhos de mapa de $9 \times 9$. Existem também esforços relacionados à comunidade de programadores como o SokEvo \cite{Haywood2012} em que uma abordagem evolucionista combinada com busca heurística é usada na criação dos problemas gerando mapas de $10 \times 8$ e com até nove blocos móveis. No entanto todos esses resultados ainda estão distantes dos resultados alcançados por humanos, por exemplo no conjunto padrão existem mapas de $20 \times 20$ e com até vinte e cinco blocos móveis.
+
+% Seção: Motivação
+\section{Motivação}
+
+O uso de busca tem tido bons resultados na resolução de problemas. De forma geral é reconhecido que algoritmos baseados em busca têm resolvido problemas para os quais é considerado que seria necessário usar inteligência humana para serem solucionados. Jogos e \textit{puzzles} são um exemplo, entre eles Sokoban apresenta grandes dificuldades como o fator de ramificação que em algumas condições pode ser maior que 100,  a profundidade da solução que pode ser maior que 600, ou o enorme espaço de busca que para um mapa de $20 \times 20$ pode ser estimado em mais de $10^{98}$. Quando comparado com o xadrez, um problema reconhecidamente difícil, tem um fator de ramificação médio de 35, a profundidade da solução de 50 e um espaço de busca de $10^{40}$. Comparado Sokoban com outros \textit{puzzles} (Tabela \ref{tab:puzzles}) domínios comuns em pesquisas envolvendo busca pode-se observar a dificuldade de resolver instâncias do Sokoban. Ainda levando em conta que seu espaço de busca é direcionado e apresenta estados que não levam à solução o que não ocorre nos outros \textit{puzzles}. Também podemos comparar a forma de obtenção de limitantes inferiores que para o Sokoban implicado na resolução de um emparelhamento de custo mínimo em grafo bipartido que tem custo $O(n^3)$ enquanto que para os outros \textit{puzzles} existem limitantes inferiores precisos a um custo muito inferior.
+
+\begin{table}[h]
+	\centering
+	\caption{Propriedades do espaço de busca em alguns \textit{puzzles} (números aproximados). Retirado de \cite{Edelkamp2012} e \cite{Junghanns1999}} \medskip
+	\begin{tabular}{c|c|c|c}
+		\hline
+		Característica &  24-\textit{puzzle} & Cubo Mágico & Sokoban  \\
+		\hline \hline
+        Fator de Ramificação & 2-4 & 12-18 & 0-100 \\
+        -efetivo- & 2.13 & 13.34 & 10 \\
+        Tamanho da Solução  & 80-112  & 14-16 & 97-674 \\
+        -efetivo- & 100 & 16 & 260\\
+        Espaço de Busca &  $10^{25}$ & $10^{18}$ & $10^{98}$\\
+	\end{tabular}
+	\label{tab:puzzles}
+\end{table}
+
+Por esses fatores resolver Sokoban se apresenta como um desafio. No entanto humanos ainda são capazes de resolvê-lo aplicando planejamento hierárquico, busca de padrões, detectando exceções e casos especiais, aprendendo de experiências anteriores, combinando soluções parciais e raciocinando por que determinada estratégia falhou \cite{Junghanns1999}. Assim esse domínio apresenta oportunidades para o desenvolvimento de técnicas algorítmicas para resolução de problemas complexos.
+
+Uma justificativa para a pesquisa com \textit{puzzles} combinatórios é a possibilidade de aplicá-las posteriormente em problemas reais. Um exemplo disso são os banco de dados de padrões \cite{Culberson1998} que foram originalmente propostos como uma heurística aplicada ao 15-\textit{puzzle} com resultados superiores ao estado da arte, depois foram aplicados ao cubo mágico \cite{Korf1997} obtendo os primeiras soluções ótimas para instâncias randômicas do problema. Após a ideia foi conceitualmente expandida usando banco de dados de padrões disjuntos melhorando o tempo de solução do 15-\textit{puzzle} por um fator de 2000 e resolvendo 50 instâncias randômicas do 24-\textit{puzzle}. Ainda, essa ideia foi aplicada com sucesso em \cite{Edelkamp2004} no domínio de verificação de modelos, planejamento \cite{Edelkamp2001} e no domínio de biologia computacional no problema de alinhamento de sequências \cite{Zhou2004} levando a um ganho de performance nesse problema.
+
+Em um trabalho recente Korf \cite{Korf2012} sugere alguns desafios de pesquisa em busca combinatória: aplicar técnicas de busca em domínios mais realistas, usufruir de avanços de hardware e que estudar dnovos problemas podem fornecer oportunidades para a criação de novas técnicas de busca produzindo assim avanços no estado da arte. A proposta apresenta neste trabalho atende a todos esses desafios, já que apresenta um espaço de busca mais realista quando comparado com outros \textit{puzzles}, avanços na quantidade de memória disponíveis podem ser captalizados no uso de variações da técnica de banco de dados de padrões e os estudos sobre o Pullban podem trazer oportunidades para criação de novas técnicas.                                                                                     
+\begin{itemize}
+    \item[]
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Seção: Objetivos e Resultados - 1 a 2 Página
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Objetivos e Resultados}
+
+\section{Objetivos}
+
+Estabelecer o limite de solução da abstração do problema de planejamento de movimento com ações de puxar através da proposta e adaptação de técnicas algorítmicas de poda do espaço de busca,
+bem como o desenvolvimento de limitantes inferiores mais precisos. Propor métodos para criação e conversão de instâncias. Pretende-se contribuir com avanços significativos nas áreas de busca heurística combinatória e planejamento, ambas fundamentais para o desenvolvimento de problemas reais e de interesse prático.
+
+\section{Resultados}
+
+Neste trabalho pretende-se desenvolver técnicas algorítmicas de busca aplicadas a variação de abstrações do problema de planejamento de movimento com ações de puxar. Para essa variação serão adaptadas técnicas das oriundas da literatura, bem como serão propostas técnicas específicas para a variação. Ainda pretende-se propor um conjunto de instâncias para o problema semelhante às disponíveis ao Sokoban. Portanto, tem-se como meta:
+
+\begin{itemize}
+    \item Propor método para criação ou adaptação de conjunto de instâncias.
+    \item Propor e adaptar técnicas algorítmicas que explorem os limites de solução dessa variação.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Seção: Metodologia e Atividades
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Metodologia e Atividades}
+
+\section{Metodologia}
+
+Para atingir o objetivo almejado, a seguinte metodologia de trabalho será adotada:
+\begin{itemize}
+    \item Um levantamento bibliográfico sobre o assunto investigado está sendo efetuado. Pretende-se a acompanhar produção dos principais pesquisadores e grupos de pesquisa da área, além das principais conferências e periódicos relacionados ao assunto.
+    \item Implementação das técnicas oriundas do estado da arte do Sokoban. Com o objetivo de compreender em detalhes os algoritmos e assim adaptá-los a variação estudada ou usá-los como inspiração para a proposta de novos algoritmos. Além de adaptar e implementar técnicas de outros \textit{puzzles} a variação estudada.
+    \item A fim de realizar experimentos computacionais será proposto um método para criação e adaptação das instâncias do conjunto do Sokoban.
+    \item Serão propostas e implementadas técnicas específicas para a variação estudada considerando as especificidades do domínio.
+    \item Serão realizados experimentos computacionais para se determinar os limites de solução das técnicas implementadas.
+    \item Os resultados obtidos serão divulgados a comunidade científica na forma de artigo em conferências. Serão disponibilizados em forma de softwares de código livre o solver desenvolvido, o programa para criação e conversão de instâncias, bem como as novas instâncias criadas para os experimentos. Assim será possível que outros pesquisadores comparem e reproduzam os experimentos relatados.
+\end{itemize}
+
+
+\section{Atividades}
+
+O presente trabalho começou a ser executado em junho de 2012 e pretende-se terminá-lo até o final do ano de 2013, com a defesa no início de 2014. Com a identificação das tarefas e sua estimativa de duração, foi possível a elaboração de um cronograma previsto para a conclusão do trabalho. As atividades previstas para o desenvolvimento da dissertação encontram-se listadas abaixo:
+
+\begin{enumerate}
+    \item Levantamento bibliográfico de trabalhos relacionados ao Sokoban;
+    \item Levantamento bibliográfico de trabalhos envolvendo: desenvolvimentos de limitantes inferiores mais precisos em problemas de busca, trabalhos relacionados a resolução de jogos combinatórios, busca heurística, planejamento e aplicações;
+    \item Implementar técnicas do estado da arte em resolução de Sokoban;
+    \item Propor método para criação e conversão de instâncias utilizando busca heurística combinada com metaheurística.
+    \item Propor limitante inferior utilizando informações especificas do domínio.
+    \item Participação na Semana Acadêmica.
+    \item Redação e submissão de artigo para conferência com os resultados;
+    \item Redação da dissertação;
+    \item Entrega da dissertação;
+    \item Defesa da dissertação;
+\end{enumerate}
+
+\newcommand{\X}{\textbullet}
+\begin{table}[h]
+	\centering
+	\caption{Cronograma de execução das atividades} \medskip
+    \scalebox{0.75}{
+	\begin{tabular}{c||c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c}
+		\hline
+        Atividade & Jun & Jul & Ago & Set & Out & Nov & Dez & Jan & Fev & Mar & Abr & Mai & Jun & Jul & Ago & Set & Out & Nov & Dez \\
+        \hline \hline
+        1         &  \X  & \X &  \X & \X  & \X  & \X  &     &     &     &     &     &     &     &     &     &     &     &     &     \\
+        \hline
+        2         &  \X  & \X &  \X & \X  & \X  & \X  &     &     &     &     &     &     &     &     &     &     &     &     &     \\
+        \hline
+        3         &     &     &     &     & \X  & \X  & \X  & \X  & \X  &     &     &     &     &     &     &     &     &     &     \\
+        \hline
+        4         &     &     &     &     &     &     &     & \X  & \X  & \X  & \X  &     &     &     &     &     &     &     &     \\
+        \hline
+        5         &     &     &     &     &     &     &     &     & \X  & \X  & \X  & \X  & \X  &     &     &     &     &     &     \\
+        \hline
+        6         &     &     &     &     &     &     &     &     &     &     &     & \X  &     &     &     &     &     &     &     \\
+        \hline
+        7         &     &     &     &     &     &     &     &     &     &     &     &     &     & \X  & \X  &     &     &     &     \\
+        \hline
+        8         &     &     &     &     &     &     &     &     &     &     &     &     &     &     &     & \X  & \X  & \X  &     \\
+        \hline
+        9         &     &     &     &     &     &     &     &     &     &     &     &     &     &     &     &     &     &     & \X  \\
+        \hline
+        10        &     &     &     &     &     &     &     &     &     &     &     &     &     &     &     &     &     &     & \X  \\
+        \hline
+	\end{tabular}
+    }
+\end{table}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Bibliografia
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\bibliographystyle{alpha}
+\bibliographystyle{alpha}
+\bibliography{bibliografia}
+
+\end{document}

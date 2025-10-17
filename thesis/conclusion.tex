@@ -1,0 +1,23 @@
+\chapter{Concluding Remarks}
+\label{ch:conclusion}
+
+This work presented a new Branch \& Price algorithm for the Single-Path Virtual Network Embedding Problem.
+It characterized the complexity of this problem by showing that finding a feasible solution for the VNEP is NP-Hard.
+The master and pricing problem of a column generation algorithm were described in details and an algorithm to solve the pricing problem was thoroughly presented.
+Implementation details were presented with alternative algorithms for node selection and branching.
+Different implementations of B\&P were tested and the best version was compared with a compact model solved with CPLEX.
+Algorithms were extensively tested by using four different topologies of different sizes, each with two settings of demands.
+
+Results have shown that B\&P has a better performance and is able to solve larger instances than the standard model solved with CPLEX.
+The presented B\&P is able to find optimal solutions for most instances with virtual networks of up to $8$ nodes. 
+For example, for dense random instances with high demands, B\&P is able to solve six of the nine instances of 14 virtual nodes and 200 physical nodes, while CPLEX is able to solve only one instance of this size.
+B\&P can also find integer solutions faster than CPLEX when one exists.
+Thus the presented algorithm can be used in practice for small instances, can obtain good solutions for large instances, and can be used to evaluate heuristic algorithms since it is able to solve large instances in a reasonable time.
+
+By exploiting the problem structure, B\&P is able to obtain good heuristic solutions quickly.
+Those integer solutions provide high quality upper bounds that can prune large portions of the search tree, improving running time and reducing memory usage.
+However, there is still room for improvement in the B\&P implementation.
+The algorithm can be extended to a Branch \& Price \& Cut by adapting cover inequalities presented in~\cite{Barnhart:2000} for the Multicommodity Flow Problem.
+Such cuts could reduce the number of nodes to explore, improving both the performance of the algorithm and the size of instances that the algorithm is able to solve.
+Additionally, an adaption of the model to map multiple virtual networks simultaneously could improve resource utilization or other metrics such as revenue.
+To implement this, a possible approach is that of \cite{Guerzoni:2014} of mapping virtual networks arriving in a window of time and allowing partial solutions to these networks.

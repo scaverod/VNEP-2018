@@ -1,0 +1,46 @@
+\section{There is no polynomial time approximation for the VNEP}
+Several heuristics were developed for the VNEP, but none of them is guaranteed to find a valid solution. In this section we show that there could not exist such algorithm unless $P=NP$.
+
+\begin{theorem} \label{th:noapprox}
+  There is no approximation algorithm that runs in polynomial time for the VNEP, unless $P=NP$.
+\end{theorem}
+
+\paragraph{Proof} To show that there is no approximation algorithm that runs on polynomial time on the size of the instance of the VNEP, we show that such an algorithm would provide a polynomial time algorithm for the Bin Packing Problem, that is a classical problem proven to be in NP-Complete.
+
+The Bin Packing Problem (BP) has as input a set~$N$ of items and a bin size of~$B$.  Each item~$i$ has a weight~$w_{i} \leq B$. The goal is to fit all items in the minimum number of bins. The decision version of the problem asks the question: ``Is it possible to fit all items in at most $k$ bins?''.
+
+Any instance $I$ of the Bin Packing Problem can be transformed into an instance of the Virtual Network Embedding Problem with the transformation procedure $\phi$. First we show that $\phi$ is polynomial in the size of $N$, then we show that a polynomial approximation algorithm for VNEP provides a polynomial exact algorithm for the BP\@. The transformation $\phi(I)$ works in the following way: a physical substrate graph is created with $2|N| + 2k$ nodes and $2|N|k + k$ edges and a virtual network graph is created with $2|N|$ nodes and $2n - 1$ edges. Then, there is a valid solution for the VNEP instance $\phi(I)$ if and only if there is also a solution for the instance $I$. Therefore an algorithm that finds a valid solution for the VNEP instance can be used to find an optimal solution for BP.
+
+\paragraph{Virtual Network} For each item $i \in N$, two nodes are created, one with a demand of $3$ and another with a demand of $2$. Those nodes are linked with and edge with a bandwidth demand of $w_{i}$. Moreover, the nodes corresponding to the items $i$ and $i+1$ for every $i < |N|$ are linked to assure the connectivity of the network, the demand of those edges is not important and can be set to $0$
+
+\paragraph{Physical Substrate Network} Likewise, for each item $i \in N$, two nodes are created, one with a capacity of $3$ and another with capacity of $2$. Furthermore, $2k$ nodes are created with capacity $1$. Half of them are linked with the nodes of capacity $3$ and the other half is linked with the nodes of capacity $2$. Each of the $k$ edges that are linked with the nodes of capacity $3$ are linked with one and only one of the nodes that are linked with the nodes of capacity $2$. The capacities of all edges is set to $B$, the size of the bin.
+
+An example of this transformation is show in Figure~\ref{fig:trans}. The original BP consists of $3$ items of weights $3$, $4$, and $8$, and a bin of size $8$. The $k$ of the decision version is $2$.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[scale=0.55]{approx.pdf}
+  \caption{Transformed Bin Packing Problem Example}\label{fig:trans}
+\end{figure}
+
+For convenience let us call the nodes with capacity $3$, the upper nodes, the nodes with capacity $2$, the lower nodes, and the nodes with capacity $1$, the middle nodes. As there are only $n$ nodes with capacity $3$, all the $n$ virtual nodes are mapped to them, likewise for the virtual nodes with demand $3$. So in the instance $\phi(I)$ there is always a valid mapping of the nodes. Hence for there to be a valid solution all the $n$ edges have to be mapped to a path in the substrate graph between the upper nodes and the lower nodes, additionally every path has to contain at least one edge between the middle nodes. Every one of those edges represent a bin. Hence, if a solution for $\phi(I)$ is given, a solution for $I$ can be obtained by extracting the first of the ``middle'' edges (the edges that link the middle nodes) in the $n$ paths. Moreover, if there is any valid mapping for $\phi(I)$, the answer for the BP decision version is ``YES''. Therefore, if a polynomial algorithm exists that solves $\phi(I)$, we can use it to compute the answer to $I$ in polynomial time. A formal proof is given below.
+
+\begin{lemma} \label{lem:transpol}
+  The transformation $\phi(I)$ is polynomial in the size of $|N|$.
+\end{lemma}
+
+\paragraph{proof} The transformation $\phi$ creates two graphs, one with $2|N| + 2k$ nodes and $2|N|k + k$ edges and another with $2|N|$ nodes and $2n - 1$ edges. As $k < |N|$, as every item fits in a single bin, the size of the VNEP instance is limited polynomially by $|N|$, the number of items of $I$.
+
+\begin{lemma} \label{lem:polapp}
+  If there exists a polynomial time approximation algorithm that solves $\phi(I)$ for every $I$, finding a solution with cost at least $\rho OPT(\phi(I))$, then there is a polynomial time algorithm that solves the BP in polynomial time.
+\end{lemma}
+
+\paragraph{proof} All the virtual nodes with demand $3$ have to be mapped to the substrate nodes with capacity $3$. If one of the nodes of demand $2$ is mapped to a substrate node of capacity $3$, there will be a virtual node of capacity $3$ that will be unmapped. Likewise, as there only $|N|$ substrate nodes with capacity $2$, every one of the $|N|$ virtual nodes with demand of $2$ will be mapped to a substrate node of capacity $2$. Note that the order is not important, every one of the $|N|!^{2} $ permutations of the virtual nodes is a valid mapping and in all of them there is a path between any of the upper and lower nodes.
+
+If there is a valid mapping for the virtual network of $\phi(I)$, the answer to I is ``YES''. Suppose a valid mapping $M$, all the virtual edges are mapped to a path in the substrate graph, let $p_{i}$ be the path for which the virtual link $i$, corresponding to the item $i$, was mapped. Let $j$ be the first substrate edge in $p_{i}$ that links the middle nodes. The edge $j$ corresponds to the bin $j$. So a solution for $I$ can be constructed if the item $i$ is put in the bin $j$. Since the capacity of all edges are not surpassed, the $k$ bins can hold the $|N|$ items.
+
+If the answer for I is ``YES'', there is a valid mapping for $\phi(I)$. Suppose the answer is ``YES'', so there is configuration of the items in the $k$ bins. Let $k_{i} \in K$ be the set of items that is put in the bin $i$. A solution for $\phi(I)$ can be built from the set $K$. Suppose any valid mapping $M$ of nodes for the virtual network. Let $\delta_{M}(u)$ be the substrate node for which the virtual node $u$ is mapped in the mapping $M$. Every virtual link $(u,v)$ corresponding to the item $j$ is mapped to a path composed of the edges $(\delta_{M}(u), x)$, $(x,y)$, $(y,\delta_{M}(v))$, where $(x,y)$ is the substrate edge corresponding to the bin $k_{i}$ for which the item $j$ was mapped. Since the sum of the items in $k_{i}$ will not exceed the capacity of the edge $(x,y)$ that correspond to that bin, the mapping $M$ has a valid mapping of edges.
+
+Therefore, if there exists a polynomial approximation algorithm that solves the VNEP, any approximate solutions is a valid solution, and any valid solution gives a solution for the BP.
+
+The Theorem~\ref{th:noapprox} follows from Lemmas~\ref{lem:transpol} and~\ref{lem:polapp}, 

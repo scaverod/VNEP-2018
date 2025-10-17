@@ -1,0 +1,22 @@
+graph {
+  ratio="0.7";
+  rankdir="LR";
+  {
+  rank="source";
+  v [shape="box", color="gray", style="filled"];
+  }
+  {
+  rank="sink";
+  u [shape="box", color="gray", style="filled"];
+  }
+  { rank = "max";
+    c;d;
+  }
+  a -- b [label="10"];
+  b -- c [label="1"];
+  c -- d [label="1"];
+  d -- b [label="1"];
+  u -- a [style="dotted", label="10"];
+  u -- b [style="dotted", label="1", penwidth=7];
+  v -- b [style="dotted", label="1", penwidth=7];
+}

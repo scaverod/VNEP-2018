@@ -1,0 +1,99 @@
+\section{Problem Definition}
+\label{sec:problem}
+In this section a simplified VNEP is presented. The goal of this formulation is to strip the problem to its core traits in order to study its characteristics. First, a formalization of the problem is presented, then two integer linear models for the problems are presented. The characteristics of the models are presented in details.
+
+\label{sec:problem}
+\subsection{Virtual Network Model}
+A virtual network is modelled as an directed graph $N^{V}=(V^{V},E^{V})$. Each node $v \in V^{V}$ represents a virtual node with a CPU demand of $C_{v}$. Each arc $e \in E^{V}$ represents a virtual link and has a bandwidth demand $B_{e}$.
+
+\subsection{Physical Substrate Model}
+The physical substrate is modelled as an undirected graph $N^{S}=(V^{S},E^{S})$. Each node $v \in V^{S}$ represents a substrate node with a CPU capacity of $C_{v}$. Each edge $e \in E^{S}$ represents a physical link and has a bandwidth capacity $B_{e}$.
+
+\subsection{Virtual Network Embedding Problem}
+The goal of the problem is to find a mapping on the nodes and vertices of the virtual network to the physical substrate graph. Each virtual node has to be mapped to one and only one substrate node with sufficient residual capacity to host it. Only one virtual node can be mapped to a given node of the substrate graph. Each virtual link $(u,v)$ has to be mapped to a s-t-path in the substrate graph, if $u$ is mapped to $s$ and $v$ to $t$. Furthermore, each physical edge has to have a sufficient capacity to hold its hosted virtual links.
+
+Moreover, the amount of resources spent on the substrate nodes is fixed (every virtual node has to be mapped), the objective function is to minimize the amount of bandwidth passing through the physical edges. This means that the smaller the paths used, the better.
+
+An example instance of the problem can be seen in Figure~\ref{fig:auxcex}. On the left is the physical network, with four nodes, and on the right is the virtual network with three nodes. A possible solution is to map $p1$ to $a$, $p2$ to $d$, and $p3$ to $b$. The virtual link $(p1,p2)$ can be mapped to $(a,d)$ and $(p2,p3)$ to $(d,c),(c,b)$. The cost of this solution is $3$.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[scale=0.55]{example.pdf}
+  \caption{VNEP example instance.\label{fig:auxcex}}
+\end{figure}
+
+\subsection{Integer Programming Models}
+\subsubsection{Flow based model}
+The problem can be modelled as the following Integer Programming model: let the decision variables $x_{v,s} = 1$ iff the substrate node $s$ hosts the virtual node $v$. And let $\Delta_{v,w,s,j} = 1$ iff the physical link $(s,j)$ hosts the virtual link $(v,w)$.
+
+\begin{align}
+    \min & \sum\limits_{(s,j) \in E^{S}} \sum\limits_{(v,w) \in E^{V}} \Delta_{v,w,s,j} B_{v,w} \nonumber \\
+    s.t. & \sum\limits_{v \in V^{V}} x_{v,s} C_{v} \leq C_{s}                     & \forall s \in V^{S}  \label{eq:cap} \\
+    & \sum\limits_{s \in V^{S}} x_{v,s} = 1                                  & \forall v \in V^{V}  \label{eq:virone}\\
+         & \sum\limits_{v \in V^{V}} x_{v,s} \leq 1                               & \forall s \in V^{S} \label{eq:subone}\\
+         & \sum\limits_{j \in V^{S}} \Delta_{v,w,s,j} - \sum\limits_{j \in V^{S}} \Delta_{v,w,j,s} = x_{v,s} - x_{w,s}  & \forall (v,w) \in E^{V}, \label{eq:flow} \\
+         & & s \in V^{S} \nonumber \\
+         & \sum\limits_{(v,w) \in E^{V}} \Delta_{v,w,s,j} B_{v,w} \leq B_{s,j}  & \forall (s,j) \in E^{S} \label{eq:bandwidth} \\
+         & x_{v,s} \in \{0,1\} & \forall v \in V^{V}, s \in V^{S} \\
+         & \Delta_{k,l,m,n} \in \{0,1\} & \forall (k,l) \in E^{V}, \\
+         & & (m,n) \in E^{S} \nonumber
+\end{align} 
+
+Equation~\ref{eq:cap} ensures that the substrate capacities are not surpassed. Equations~\ref{eq:virone} and~\ref{eq:subone} enforce, respectively, that every virtual node is mapped to a different substrate node and every substrate node hosts at most one virtual node. The flow constraint is~\ref{eq:flow}, it ensures that every virtual link is mapped to a path in the substrate graph. Finally, Equation~\ref{eq:bandwidth} ensures that the bandwidth capacities of the physical edges are not violated.
+
+\paragraph{Model Complexity}
+There are a total of $|V^{V}||V^{S}| + |E^{V}||E^{S}|$ variables and $2|V^{S}| + |V^{V}| + |V^{S}||E^{V}| + |E^{S}|$ constraints (excluding the integrality constraints).
+
+%\paragraph{Optional Restrictions}
+%Aggregate Constraints~\ref{eq:cap} and~\ref{eq:subone}. Let $C_{max}$ be the largest CPU capacity in the substrate graph.
+%\begin{align}
+%  \sum\limits_{v \in V^{V}} M_{v,s} (C_{v} + C_{max}) \leq C_{s} + C_{max} \quad \forall s \in V^{S} 
+%\end{align}
+
+\subsubsection{Path-based Model}
+As an alternative formulation, the problem can be modeled in terms of paths. The following path-based model is based on \cite{hu:2013}, which in turn is based on the idea of mapping nodes and edges in a single step through an auxiliary graph (an idea first presented in \cite{Chowdhury2009}). In the original model, the virtual networks allow path splitting. Since the problem treated in this work does not allow path splitting, a new formulation is made. To the best of our knowledge that is the first path-based formulation for the VNEP for unsplittable networks.
+
+As in the model presented in the previous section, the decision variable $x_{v,s}$ is set to one if and only if the virtual node $v$ is mapped into the node $s$. For each possible path $p$ in the set $P$ of all paths in the substrate graph, a decision variable~$f_{p}$ is one if and only if the path is used in the solution. Note that the number of paths grows exponentially with the size of the substrate graph.
+
+\begin{align}
+    \min & \sum\limits_{p \in P}  z_{p} c_{p} \nonumber \\
+    s.t. & \sum\limits_{s \in V^{S}} x_{v,s} = 1                                  & \forall v \in V^{V} \label{eq:virone2} \\
+         & \sum\limits_{v \in V^{V}} x_{v,s} \leq 1                               & \forall s \in V^{S} \label{eq:subone2}\\
+         & \sum\limits_{p \in P^{k}} z_{p} = 1                                    & \forall k \in E^{V} \label{eq:virdemone2}\\
+         & \sum\limits_{p \in P^{k}} B_{k} z_{p} \leq B_{e}                                & \forall e \in E^{S} \label{eq:bandwidth2} \\
+         & \sum\limits_{p \in P} \delta_{p,v,s} z_{p} \leq M x_{v,s}                 & \forall v \in V^{V}, s \in V^{S} \label{eq:onlyoneaux2} \\
+         & x_{v,s} \in \{0,1\} & \forall v \in V^{V}, s \in V^{S} \\
+         & z_{p} \in \{0,1\} & \forall p \in {P}
+\end{align} 
+
+Constraint~\ref{eq:virone2} ensures that every virtual node is mapped to a different substrate node. Constraint~\ref{eq:subone2} enforce that each substrate node hosts at most one virtual node. Constraint~\ref{eq:virdemone2} states that each path serves only one virtual link. Constraint~\ref{eq:bandwidth2} is related to bandwidth constraints of the physical nodes. Finally,~\ref{eq:onlyoneaux2} states that only the selected auxiliary edge can be used, $\delta_{p,v,s}$ is equal to one if and only if the path $p$ uses auxiliary edge $(v,s)$.
+
+\paragraph{Model Complexity}
+The number of constraints in the model is $|V^{V}| + |V^{S}| + |E^{V}| + |E^{S}| + |V^{V}||V^{S}|$. The number of variables grows exponentially with the size of the substrate graph. Therefore, a column generation method has to be used to efficiently solve the presented model. Further details will be presented in future works.
+
+%\subsection{Special Cases}
+%One approach done in the literature to ease the VNEP is to consider special instances of the problem. The simplest virtual network is composed of only one node, in that case any valid mapping is optimal. In that case the algorithm to find a valid mapping is simply to check every substrate vertex and map the vertex to any substrate node that has the capacity to hold it.
+
+%The next case is a virtual network with only two nodes and an arc between those nodes. To find the optimal valid mapping in that case is also polynomial in time. It suffices to do a breadth first search on every node in the substrate graph.
+
+%Past those two simple cases, the problem becomes more difficult: if the virtual network is a star-graph the mapping is similar to the Unsplittable Flow Problem.
+\subsection{Bounds}
+The use of lower bounds can drastically reduce the running time of exact exponential algorithms. The closer the bound to the optimal solution, the more branches are pruned on the search tree.
+
+Let the optimal solution of a given instance $I$ of the VNEP be $OPT(I)$. Since every virtual link has to be mapped to a path in the substrate network, a lower bound on the optimal solution is the sum of all the edge demands in the virtual network. As the graph has a limited capacity on the substrate network edges, a natural upper bound is the sum of all capacities. Those two bounds are formalized in the Equation~\ref{eq:lb1}.
+
+\begin{equation}
+  \sum\limits_{e \in E^{V}} B_{e} \leq OPT(I) \leq \sum\limits_{e \in E^{S}} B_{e}
+  \label{eq:lb1}
+\end{equation}
+
+A better lower bound is given by Equation~\ref{eq:lb2}. Let $dist(s, t)$ be the minimum size in numbers of edges of all simple paths in the substrate network from $s$ to $t$.
+
+\begin{equation}
+  \sum\limits_{\forall(v,w) = k \in E^{V}} 
+  ( \min\limits_{\forall s,t \in V^{S} | C_{v} \leq C_{s}, C_{w} \leq C_{t} } \{ dist(s,t) \} 
+  B_{k} ) \leq OPT(I) \label{eq:lb2}
+\end{equation}
+
+The lower bound in Equation~\ref{eq:lb2} can be obtained in time $O(|E^{S}||V^{S}|)$ by running one breadth-first search for each node.
+

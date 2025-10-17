@@ -1,0 +1,50 @@
+\section{Introduction}
+% TODO citation needed
+Virtualization has been seen as the solution for the problem of ossification of the Internet, a way to facilitate the evolution of the protocols of the Internet \cite{Anderson2005}. In virtualized environments, multiple networks can simultaneously use the same physical structure in a transparent way. By creating a new layer of abstraction over the physical networks, new protocols can be tested on heterogeneous experimental architectures \cite{Anderson06geni}. Likewise, Service Providers (SPs) can offer customized services, like customized protocols, or co-location from expanded network presence, by leasing resources from infrastructures providers (InPs) \cite{Feamster:2007}. Virtualization is already being used in practice \cite{Carapinha:2009, Anderson06geni}.
+
+The Virtual Network Embedding Problem (VNEP) is central to achieve virtualization. It consists in mapping virtual nodes into physical nodes, and virtual links into physical paths that link the physical nodes that host its endpoints. In addition, the physical resources have limitations that need to be taken into account.
+
+Since the VNEP is a difficult problem (a detailed study on the complexity of the problem will be presented in future works), little attention was given to exact methods to the VNEP and their limitations. The larger part of the literature focus on heuristic solutions to the problem. And even though some papers lay out an exact solution, those solutions are treated as a means to get an heuristic solution.
+
+The objective of the current work is to find and evaluate efficient, exact algorithms for the VNEP\@. As well as evaluating their applicability in real scenarios. An overview of the related works is presented in Section~\ref{sec:relwork}. Section~\ref{sec:problem} contains the details of a simplified version of the VNEP\@. Finally, this work is concluded in Section~\ref{sec:conclusion} with future research directions.
+
+\subsection{VNEP variations}
+Since virtualization is such a broad field, with many different objectives and constraints involved, the literature is teeming with variations of this problem. Each author models the problem according to their goals and constraints. Surveys of the different models and constraints presented in the literature can be found in~\cite{Chowdhury2010} and~\cite{FischerSurvey}.
+
+What follows is a non comprehensive list of the VNEP aspects treated in the literature.
+
+The fist aspect is the number of requests to be mapped. In general, the goal of virtualization is to use the same physical network to accommodate multiple network requests. Some authors present the mapping of one single network request at a time. Others present the mapping of multiple requests in a window of time. In the latter case, the requests can be known in advance or dynamically. When multiple network requests are to be served, 
+
+Depending on the focus of the work, some constraints can be present or omitted, some examples of constraints found in the literature are:
+
+\begin{itemize}
+  \item Limited resources on the nodes, such as CPU or memory. Resources on the nodes can be either a single resource or multiple resources.
+  \item Limited resources on the edges. In general, substrate edges have a limit of bandwidth that can pass through them.
+  \item Limitations on the location of nodes.
+  \item Limitation on the delay or the size of the path that host a virtual link.
+  \item Limitation on the routing capacities.
+  \item Path splitting --- A virtual link can be mapped to one single path in the substrate graph or multiple paths. The latter case is more flexible, but is not always allowed by the physical network.
+\end{itemize}
+
+Also different objective functions exist. Some examples are:
+
+\begin{itemize}
+  \item Minimize the total cost. The physical nodes and links can have heterogeneous cost associated with them.
+  \item The use of bandwidth by the network. The use of path of size 4 instead of one of cost 2 means that the bandwidth use is doubled.
+  \item The maximization of revenue, favoring more profitable virtual network requests.
+  \item Just any valid mapping, independent of cost or revenue.
+\end{itemize}
+
+Finally, some applications allow the networks do adapt along the windows of time. Adaptive resource allocation is shown to maximize the aggregate performance of multiple virtual networks \cite{He:2008}. Adaptive algorithms will not be studied in the present report.
+
+This work is going to focus on a simpler version of the problem. A common ground on the several variations of the problem is found that still maintains the hardness of the problem and a realistic usefulness. Further details on the formulation of the VNEP are found in Section~\ref{sec:problem}.
+
+
+\subsection{Related Problems}
+It is worthwhile to analyse problems similar to the VNEP in order to uncover its difficulty. The Virtual Network Embedding Problem is commonly associated in the literature with the Multicommodity Flow Problem.
+
+The minimum-cost multicommodity flow problem (MMFP) consists in finding a flow that ships multiple commodities through a single network without violating the capacity constraints of the edges and has a minimum cost \cite{Goldberg1998}. Given an undirected graph $G = (V,E)$ with capacity $c_{e}$ for each edge $e \in E$, and a set of terminal pairs $T$, and a demand $\rho_{i}$ for each terminal pair $i$, the objective of this problem is to find a flow through G that fulfils the demand without violating the constraints. For networks that allow path splitting, each mapping of virtual nodes in an instance of the VNEP yields an instance of the multicommodity flow problem. 
+
+The Unsplittable Flow Problem (UFP) consists in finding a set of valid paths $P$ such that the demand $\rho_{i}$ of each terminal pair flows through the paths in $P$ without violating the capacities $c_{e}$. Kleinberg \cite{Kleinberg96} identifies three main optimization problems related to the UFP in the literature. The one that resembles the VNEP is that of finding a subset of terminals that maximizes the total demand fulfilled. The VNEP is in fact more difficult because all demands have to be fulfilled. Each possible combination of a possible mapping of the VNP gives rise to an instance of the Unsplittable Flow Problem. Furthermore, an optimal solution for the UFP is merely a feasible solution for the VNP.
+
+Since the Virtual Network Embedding problem seems to be harder than the Unsplittable Flow Problem, it reinforces the notion that the former is a hard problem, a further study on the complexity of the VNEP will be present in future works.

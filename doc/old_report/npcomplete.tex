@@ -1,0 +1,43 @@
+
+\section{Virtual Network Embedding Problem is in NP-Complete}
+To prove that VNEP $\in$ NP-Complete it suffices to show that VNEP $\in$ NP and there exists a polynomial transformation $\phi$ of the instances of Hamitonian Path Problem (HPP) to instances of the Virtual Embedding Problem that for every instance $I$ of the Hamiltonian Path Problem, $I \in HPP$ iff $\phi(I) \in VNEP$.
+
+\begin{theorem}
+  VNEP is in NP
+\end{theorem}
+
+\paragraph{Proof} Given an instance $I$ of VNEP, the mapping $M$ can be recognized as a solution for $I$ in polynomial time on the size of $I$.
+\begin{itemize}
+  \item Verify if every virtual node was mapped to only one substrate node with enough resources to hold it $O(|V^{V}||V^{S}|)$.
+  \item Verify if every substrate node was mpaped to only one virtual node $O(|V^{V}||V^{S}|)$.
+  \item Verify if every link was mapped to a valid path in the substrate graph with enough resources to hold it $O(|E^{V}||E^{S}|)$.
+\end{itemize}
+
+\begin{theorem}
+  There is a hamiltonian path in the graph $G=(V,E)$ if and only if there is a valid mapping in $\phi(G)$ with cost less than or equal to $k$.
+\end{theorem}
+
+\paragraph{Proof} Let $G=(V,E)$ be an instance of the Hamiltonian Path Problem, we define a VNE instance $\phi(G)$ as follows: the substrate graph of $\phi(G)$ is defined as the graph G, the bandwidth capacity ofthe edges is set to one a processing power of its nodes is also set to one. The virtual network request of $\phi(G)$ is a graph $V=(N,A)$. The set $N$ is composed of $|V|$ nodes, one for each node on the substrate graph, the node $i$ is linked with node $i+1$ for every $i < n$. The value $k$ of $\phi(G)$ is set to $n-1$.
+
+This transformation is polynomial: two graphs are created with $n$ nodes and $m + n - 1$ edges total. An example of this transformation is show in Figures~\ref{fig:ham} (a hamiltonian path example) and~\ref{fig:hamtrans} (the transformed VNE instance).
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[scale=0.5]{hamgraph.pdf}
+  \caption{Hamiltonian Path Problem Instance Example}\label{fig:ham}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[scale=0.5]{transf.pdf}
+  \caption{Transformed Instance}\label{fig:hamtrans}
+\end{figure}
+
+
+\paragraph{If there is a Hamiltonian Path in the graph $G=(V,E)$, there is a valid mapping in $\phi(G)$ with cost less than $|V|$}
+Let $(v_{1},v_{2},\cdots,v_{n}$) be such a a path, then, for $i \leq n$, the node $w_{i}$ can be mapped to the node $v_{i}$ in the substrate graph, and, for $j < |V|$ the link between $w_{j}$ and $w_{j+1}$ can be mapped to the path composed of one edge between $v_{j}$ and $v_{j+1}$. The total weight of this mapping will be $|V|-1$, since there are $|V|-1$ edges in the hamiltonian path.
+
+\paragraph{If there is a valid mapping in $\phi(G)$ that costs less than or equal to $k = |V| - 1$, there is a Hamiltonian Path in the graph $G=(V,E)$}
+Since the cost of the mapping is smaller than $|V|$ and there are $|V|-1$ edges in the virtual graph, all the links in the virtual graph are mapped to a single edge in the substrate graph. Let the substrate node $v_{i}$ for which the virtual node $w_{i}$ was mapped to be the $i$-th node in the Hamiltonian Path $P$. All edges $(v_{i},v_{i+1})$ exist in the substrate graph, since the virtual link $(w_{i},w_{i+1})$ was mapped to a single edge in the substrate graph. So $P$ is a Hamiltonian Path.
+
+

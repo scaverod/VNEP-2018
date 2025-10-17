@@ -1,0 +1,1 @@
+egrep "@(((x|f)frac)|(columns)|(c.*time)|(cguFeasible)|(cguCost))" | tformat --latex --sum @cguFeasible --meanstddev @cguCost @cgtime --mean @xfrac @ffrac @columns @cgpathtime @cgcptime @cgipathtime | sed 's/\_/ \& /g' | sort -n -k3,3 -k1,1

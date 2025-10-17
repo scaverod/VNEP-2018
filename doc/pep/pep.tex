@@ -1,0 +1,235 @@
+\documentclass[pep,twoside,portuguese]{iiufrgs}
+
+% Definição de Pacotes.
+\usepackage[
+		pdfauthor={Leonardo Fernando dos Santos Moura},
+		pdftitle={Soluções Exatas para o problema de Mapeamento de Redes Virtuais},
+		pdfstartview=FitH
+	]{hyperref}	% Pacote para propriedades do documento.
+
+\usepackage[brazilian]{babel}			% Linguagem.
+\usepackage[english]{babel}				% Linguagem.
+\usepackage[T1]{fontenc}					% Conjunto de caracteres correto.
+\usepackage[latin1]{inputenc}			% Acentuação.
+\usepackage{graphicx}         	% Pacote para importar figuras.
+\usepackage{color}            	% Pacote para se trabalhar com cor no texto.
+\usepackage{times}            	% Pacote para usar fonte Adobe Times.
+\usepackage{multirow}	      	% Pacote para utilização de várias linhas em uma tabela.
+\usepackage{multicol}	      	% Pacote para utilização de várias colunas em uma tabela.
+\usepackage{url}	      	% Pacote para utilização de URLs.
+\usepackage{float}
+\usepackage{enumerate}
+\usepackage{array}
+\usepackage{makecell}
+\usepackage{tikz}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{mathtools}
+
+\hypersetup{colorlinks,
+		citecolor=black,
+		filecolor=black,
+		linkcolor=black,
+		urlcolor=black
+	}						% Definição das cores dos hiper-links.
+	
+
+% Definição de Variáveis
+\title{Soluções Exatas para o Problema de Mapeamento de Redes Virtuais}
+
+\advisor[Profa. Dra.]{Luciana Salete Buriol\\buriol@inf.ufrgs.br}
+
+\author{Leonardo Fernando dos Santos Moura\\lfsmoura@inf.ufrgs.br}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Palavras-chave
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\keyword{Métodos de Resolução Exatos}
+\keyword{Branch and Bound}
+\keyword{Virtualização de Redes}
+\keyword{Programação Linear com variáveis inteiras}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Início do Documento
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Folha de rosto
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Índice
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\tableofcontents
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Resumo - 1 Páginas
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{abstract}
+  Neste trabalho serão estudados métodos de resolução exata para o problema de mapeamento de redes virtuais. Os objetivos preliminares são um estudo teórico sobre a complexidade do problema, um estudo sobre a geração de instâncias realistas, a implementação e comparação de métodos de resolução exata aplicados ao problema estudado (como \textit{Branch and Bound}, \textit{Branch and price} e \textit{Backtrack}), bem como a introdução de novos limitantes inferiores e técnicas construtivas que podem melhorar a performance de técnicas exatas.
+\end{abstract}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Seção: Introdução e Motivação - 2 a 3 Página
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Introdução}
+
+\section{O problema de mapeamento de redes virtuais}
+Virtualização de redes tem sido visto como a solução para o problema de ossificação da Internet permitindo mudanças nos protocolos de maneira mais rápida e eficiente \cite{Feamster:2007}. O problema de mapeamento de redes virtuais consiste em mapear uma ou mais redes virtuais em uma rede física, permitindo que várias redes compartilhem os mesmos recursos físicos. Nodos virtuais devem ser mapeados em nodos físicos que possuam capacidade suficiente para hospedá-los. Os enlaces virtuais devem ser mapeados a um enlace físico ou a um caminho físico que comunique os dois nodos virtuais. Este caminho deve ter capacidade suficiente também para hospedar os enlaces virtuais. Além de encontrar um mapeamento realizável, o objetivo do problema é minimizar uma função objetivo que pode ser definida, por exemplo, como o custo de um certo mapeamento. Um exemplo de uma instância do problema pode ser visto na Figura~\ref{fig:instance}.
+
+\begin{figure}[h]
+    {
+	    \centering
+    	\includegraphics[height=2.5in]{instance}
+	    \center\caption{Instância de exemplo.}
+    	\label{fig:instance}
+    }
+\end{figure}
+
+Nesse exemplo temos uma rede física na esquerda composta de quatro nodos, todos os enlaces físicos tem uma capacidade de banda de 1. Na direita temos a rede virtual, composta de 3 nodos. Uma possível solução seria mapear o nodo ``p1'' no nodo ``a'', o nodo ``p2'' no nodo ``b'' e o nodo p3 no nodo ``c'' e os enlaces virtuais $(p1,p2)$ no enlace físico $(a,b)$ e $(p2,p3)$ no enlace $(b,c)$.
+
+O problema de mapeamento de redes virtuais é uma problema difícil e a maioria dos artigos da literatura não tratam o problema de forma exata \cite{Chowdhury2010}, mas utilizando heurísticas ou técnicas de aproximação. O objetivo desse trabalho é estudar técnicas exatas de resolução para o problema de mapeamento de redes virtuais.
+
+\subsection{Definição do Problema}
+Na literatura existem diversas definições para o problema de mapeamento de redes virtuais. Cada autor especifica as características específicas que quer tratar. O presente trabalho pretende tratar o modelo mais simplificado mas que ainda preserva as características que tornam o problema difícil de ser resolvido de forma ótima.
+
+Portanto, o problema tratado consiste em mapear uma rede virtual em uma rede física. Cada nodo da rede física pode hospedar somente um nodo virtual. 
+
+A rede virtual é modelada através de um grafo $N^{V}=(V^{V},E^{V})$. Cada nodo $v \in V^{V}$ representa um nodo virtual com uma demanda de CPU de $C_{v}$. Cada aresta $e \in E^{V}$ representa um enlace virtual com demanda de banda de $B_{e}$. Já a rede física é modelada através de um grafo $N^{S}=(V^{S},E^{S})$. Cada nodo $v \in V^{S}$ tem uma capacidade de CPU de $C_{v}$. Cada aresta $e \in E^{S}$ representa um enlace físico com capacidade $B_{e}$.
+
+Um mapeamento válido $M$ tem que respeitar as seguintes restrições:
+\begin{itemize}
+  \item Todo o nodo virtual deve ser mapeado em um nodo físico. A capacidade de CPU desse nodo físico tem que ser maior do que a demanda do nodo virtual.
+  \item Cada nodo físico pode hospedar no máximo um nodo virtual.
+  \item Cada enlace virtual $(u, v)$ tem que ser mapeado em um caminho (uma sequência de um ou mais arcos adjacentes) na rede físico entre os nodos físicos que hospedam os nodos virtuais $v$ e $u$. Todos os enlaces nesse caminho tem que ter capacidade suficiente de banda para hospedar o link $(u,v)$.
+\end{itemize}
+
+Além disso procura-se encontrar um mapeamento válido de custo mínimo. O custo é definido como a banda usada pelos arcos virtuais, ou seja, a soma de cada demanda multiplicada pelo número de enlaces físicos utilizadas pelo enlace virtual.
+
+\subsection{Trabalhos Relacionados}
+O problema de mapeamento de redes virtuais tem gerado muito interesse pela comunidade científica. Os artigos \cite{Chowdhury2010} e \cite{FischerSurvey} fazem uma sondagem no estado da arte, classificando os diferentes tipos de problema e as diferentes restrições utilizados.
+
+Devido a complexidade do problema de mapeamento de redes virtuais, a maior parte das técnicas utilizadas é heurística. Algoritmos heurísticos resolvem o problema de forma aproximada, como é o caso de \cite{Fajjari2011}, que propõe uma busca heurística baseada no método de colônia de formigas. Enquanto que \cite{Pages:2012} resolve o problema tanto de forma ótima (utilizando um modelo linear) quanto de forma heurística (utilizando a meta-heurística GRASP).
+
+Um estudo sobre geração de instâncias realísticas é apresentando em \cite{infuhr:2011}. Os artigos \cite{Alkmim:2011} e \cite{Buriol:2012} utilizam um modelo de programação inteira para resolver versões específicas do problema. Já \cite{Liu:2011} e \cite{Trinh:2011} criam um modelo não linear e o resolvem utilizando programas comerciais.
+
+A maior parte das soluções exatas é baseada em programação inteira. A única exceção conhecida pelo autor é uma técnica de \textit{Backtrack} é utilizada por \cite{Lischka:2009}, um algoritmo para o problema de detecção de isomorfismo de grafos é adaptado para o problema de mapeamento de redes virtuais.
+
+\begin{itemize}
+    \item []
+\end{itemize}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Seção: Objetivos e Resultados - 1 a 2 Página
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Objetivos e Resultados}
+
+\section{Objetivos}
+Prover bases teóricas sobre o problema de mapeamento de redes virtuais. Prover um método de gerar instâncias realísticas para o problema. A implementação, descrição e teste de diferentes métodos exatos para o problema em questão, bem como prover limitantes inferiores e equações de corte aos modelos matemáticos que possam ser usadas para obter soluções exatas mais rapidamente. Assim como métodos heurísticos que permitam obter soluções aproximadas com ou sem garantias. Tais métodos também podem ajudar na obtenção de uma solução exata mais rapidamente.
+
+\section{Resultados}
+
+Os resultados esperados desse trabalho consistem em um estudo aprofundado sobre a resolução exata do problema de mapeamento de redes virtuais. O que engloba a geração de instâncias realísticas, um estudo sobre a sua complexidade teórica e a implementação e a comparação de métodos exatos aplicados ao problema. Tem-se, portanto, como metas para esse trabalho:
+
+\begin{itemize}
+  \item Prover um estudo teórico sobre a complexidade do problema de mapeamento de redes virtuais.
+  \item Propor métodos de geração de instâncias realísticas.
+  \item Implementação das seguintes técnicas para obtenção de solução exata: \begin{itemize}
+        \item Branch and Bound
+        \item Backtrack
+        \item Branch and Price
+      \end{itemize}
+  \item Publicação dos resultados obtidos em um periódico ou conferência da área.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Seção: Metodologia e Atividades
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Metodologia e Atividades}
+
+\section{Metodologia}
+
+Para a obtenção dos resultados esperados, a seguinte metodologia de trabalho será utilizada:
+
+\begin{itemize}
+    \item Um estudo bibliográfico sobre o problema de virtualização de redes será efetuado, em especial sobre o problema de mapeamento de redes virtuais resolvido de forma exata. Tal estudo visa obter um maior entendimento sobre o estado da arte através das principais conferências e periódicos da área.
+
+    \item Estudo teórico sobre a complexidade do problema trabalhado assim como limitantes inferiores que possam ser utilizados para a melhora das técnicas de resolução implementadas.
+      
+    \item Geração de instâncias realísticas para o problema. Tanto instâncias generalizadas quanto instâncias específicas, às quais versões específicas dos métodos estudados possam ser utilizadas.
+
+    \item Implementação de técnicas de estado da arte em métodos exatos para o problema de mapeamento de redes virtuais, assim como adaptá-las e melhorá-las utilizando melhores limitantes inferiores e cortes para os modelos matemáticos, assim como novas técnicas de busca heurísticas e algoritmos específicos para instancias com propriedades especiais.
+
+    \item Experimentos computacionais para a comparação das diferentes técnicas de resolução exata implementadas
+
+    \item Divulgação dos resultados obtidos em conferências consagradas da área, assim como a disponibilização, através da Internet, dos algoritmos implementados e dos geradores de instâncias desenvolvidos.
+\end{itemize}
+
+\section{Atividades}
+
+O presente trabalho começou a ser desenvolvido em agosto de 2013 e planeja-se terminá-lo até setembro de 2014. O seguinte cronograma, apresentado na Tabela \ref{crono}, apresenta as atividades envolvidas no projeto que são detalhadas abaixo:
+
+\begin{enumerate}
+    \item Levantamento bibliográfico sobre estado da arte de resolução exata do problema de mapeamento de redes virtuais e sobre técnicas exatas de resolução de problemas $NP-Completos$.
+    \item Geração de instâncias para o problema.
+    \item Estudo teórico sobre a complexidade do problema.
+    \item Modelização matemática do problema.
+    \item Implementação da técnica de \textit{Branch and Bound}. 
+    \item Implementação da técnica de \textit{Branch and Price}.
+    \item Redação e submissão de artigo para conferência com os resultados.
+    \item Estudo sobre técnicas heurísticas de resolução que dêem suporte aos métodos exatos.
+    \item Obtenção de limites inferiores.
+    \item Participação na Semana Acadêmica.
+    \item Redação da dissertação.
+    \item Entrega e defesa da dissertação.
+\end{enumerate}
+
+\newcommand{\X}{\textbullet}
+\begin{table}[h]
+	\centering
+	\caption{Cronograma das atividades} \medskip
+    \scalebox{0.75}{
+	\begin{tabular}{c||c|c|c|c|c|c|c|c|c|c|c|c|c|c}
+		\hline
+        Atividade &  Ago & Set & Out & Nov & Dez & Jan & Fev & Mar & Abr & Mai & Jun & Jul & Ago & Set \\
+        \hline \hline
+        1         &  \X  & \X  & \X  & \X  & \X  &     &     &     &     &     &     &     &     &     \\
+        \hline
+        2         &      & \X  & \X  & \X  &     &     &     &     &     &     &     &     &     &     \\
+        \hline
+        3         &      & \X  & \X  &     &     &     &     &     &     &     &     &     &     &     \\
+        \hline
+        4         &  \X  &     &     &     &     &     &     &     &     &     &     &     &     &     \\
+        \hline
+        5         &      &     & \X  & \X  &     &     &     &     &     &     &     &     &     &     \\
+        \hline
+        6         &      &     &     & \X  & \X  &     &     &     &     &     &     &     &     &     \\
+        \hline
+        7         &      &     &     &     & \X  & \X  &     &     &     &     &     &     &     &     \\
+        \hline
+        8         &      &     &     &     &     &     & \X  & \X  &     &     &     &     &     &     \\
+        \hline
+        9         &      &     &     &     &     &     &     & \X  & \X  &     &     &     &     &     \\
+        \hline
+        10        &      &     &     &     &     &     &     &     &     & \X  &     &     &     &     \\
+        \hline
+        11        &      &     &     &     &     &     &     &     & \X  & \X  & \X  & \X  & \X  &     \\
+        \hline
+        12        &      &     &     &     &     &     &     &     &     &     &     &     &     & \X  \\
+        \hline
+	\end{tabular}
+    }
+  \label{crono}
+\end{table}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Bibliografia
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\bibliographystyle{alpha}
+\bibliographystyle{abnt}
+\bibliography{VNE}
+
+\end{document}

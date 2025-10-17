@@ -1,0 +1,40 @@
+Graph {
+  subgraph cluster_s {
+    node [color=black]
+    1; 6;
+    node [style=filled,color=red]
+    2; 7; 4; 5;
+    node [style=filled,color=grey]
+    8;
+    3;
+  }
+
+  subgraph cluster_v {
+    style=filled;
+    color=lightblue;
+    node [style=filled, color=white]
+    a; b;
+    node [style=filled, color=grey]
+    c; d;
+  }
+    1 -- 3
+    2 -- 3 [ label="(c,b),(d,b)"]
+    2 -- 6 [ label="(c,a)"]
+    2 -- 7 [ label= "(a,b),(c,b),(d,b)"]
+    3 -- 4 [ label= "(c,b),(d,c)"]
+    3 -- 5 [ label= "(d,c)(d,b)"]
+    4 -- 6 [ label= "(c,a)"]
+    6 -- 8
+  a -- b
+  a -- c
+  b -- c
+  b -- d
+  c -- d
+
+  edge [style=dotted, color=red]
+  2 -- a
+  7 -- b
+  4 -- c
+  5 -- d
+
+}

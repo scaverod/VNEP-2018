@@ -1,0 +1,32 @@
+Graph example {
+  center=true;
+  subgraph cluster_substrate{
+    label="Physical Substrate Network";
+    {rank=1;
+      a [label="a (11)"];
+    }
+    {rank=same; 
+      b [label="b (7)"];
+      d [label="d (16)"];
+    }
+    c [label="c (11)"];
+  }
+
+  a -- b [label="10"]
+  b -- c [label="5"]
+  c -- d [label="30"]
+  d -- a [label="30"]
+
+  
+  subgraph cluster_virtual {
+    label="Virtual Network";
+    node [shape=box]
+    { p1 [label="p1 (10)", style="filled, fillcolor=gray"]; 
+      p2 [label="p2 (10)", style="filled, fillcolor=gray"]; 
+      p3 [label="p3 (15)", style="filled, fillcolor=gray"];
+    }
+  }
+  p1 -- p2 [label="20", color="blue",penwidth="7",style="dashed"]
+  p2 -- p3 [label="10", color="red",penwidth="7",style="dotted"]
+}
+

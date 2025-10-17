@@ -1,0 +1,150 @@
+\documentclass[ppgc,diss,english]{iiufrgs}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{times}  
+\usepackage[alf,abnt-emphasize=bf]{abntex2cite}
+
+\usepackage{amsfonts}
+%\usepackage[numbers]{natbib}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{verbatim}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{tocbibind}
+\usepackage[lined, linesnumbered]{algorithm2e}
+\usepackage{array}
+\usepackage{makecell}
+\usepackage{tikz}
+\usepackage{lscape}
+\usepackage{caption}
+%\usepackage{cite}
+\usepackage{subcaption}
+\usepackage{marginnote}
+\usepackage{todonotes}
+
+\usepackage{ifdraft}
+\usepackage[all]{xy}
+\usepackage[titletoc]{appendix}
+
+\usetikzlibrary{positioning,arrows}
+\tolerance=1
+\emergencystretch=\maxdimen
+\hyphenpenalty=10000
+\hbadness=10000
+
+\makeatletter
+\renewcommand{\@algocf@capt@plain}{above}% formerly {bottom}
+\makeatother
+
+\title{Branch \& Price for the Virtual Network Embedding Problem}
+\author{Moura}{Leonardo F.S.}
+\advisor[Prof.~Dr.]{Buriol}{Luciana}
+\date{}{2015}
+\keyword{Branch \& Price}
+\keyword{Virtual Network Embedding}
+\keyword{Network Virtualization}
+\keyword{Exact Algorithms}
+
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{corollary}{Corollary}
+\newcommand{\todoc}[1]{\todo[color=red!20, bordercolor=white]{#1}}
+\newcommand{\todoi}[1]{\todo[inline,color=red!20, bordercolor=white]{#1}}
+
+%\setcounter{tocdepth}{1}
+
+\begin{document}
+
+\maketitle
+
+\chapter*{Acknowledgments}
+First I would like to thank my advisor Luciana Buriol for accompanying me since the inception of my academic career.
+With her help I have grown so much as a person and as a professional. 
+An equal share of thanks goes to my former advisors Marcus Ritt, Aline Villavicencio, and Van-Dat Cung.
+Their guidance was essential in my academic success.
+
+Without my parents, Raquel and Vitor, I would not have made it this far.
+A sincere thanks to all my friends for all their support and for putting up with me during difficult times.
+
+A special thanks is due to my research group colleagues --- Leonardo, Paulo, Marcelo, Tadeu, André, Germano, Renato, Alex, Fernando, and Arton ---
+for all their help, either by discussing technical, theoretical or personal issues.
+Many thanks to all the organizers of ELAVIO 2014, there I learned a lot and made good friends for life.
+
+This work was supported by CNPq (Brazilian National Research Council) and by Instituto de Informática da UFRGS.
+
+\begin{abstract}
+Virtualization allows one or more virtual networks to share physical infrastructures.
+The Virtual Network Embedding problem (VNEP) is one of the main challenges in the virtualization of physical networks. 
+This problem consists in mapping a virtual network into a physical network while respecting capacity constraints.
+This work shows that finding a feasible solution for this problem is NP-Hard.
+However, many instances can be solved up to optimality in practice by exploiting the problem structure.
+%In this work we use a flow-based formulation of the problem and solve the relaxation using a
+%column generation approach. 
+%This method results in high quality lower bounds obtained in short time, as the computational experiments show.
+%This suggests that it can be successfully embedded in a branch \& price method for providing optimal solutions for the VNEP.
+We present a Branch \& Price algorithm applied to instances of different topologies and sizes.
+The experimental results suggest that the proposed algorithm is superior to the Integer Linear Programming model solved by CPLEX.
+\end{abstract}
+
+\begin{englishabstract}{Branch \& Price para o Problema de Mapeamento de Redes Virtuais}{Problema de Mapeamento de Redes Virtuais. Programação Linear Inteira. Geração de Colunas. Algoritmos Exatos}
+Virtualização permite o compartilhamento de uma rede física entre uma ou mais redes virtuais.
+O Problema de Mapeamento de Redes Virtuais é um dos principais desafios na virtualização de redes.
+Esse problema consiste em mapear uma rede virtual em uma rede física, respeitando restrições de capacidade.
+O presente trabalho mostra que encontrar uma solução factível para esse problema é NP-Difícil.
+Mesmo assim, muitas instâncias podem ser pode ser resolvidas na prática através da exploração de sua estrutura.
+Nós apresentamos um algoritmo de Branch \& Price aplicado a instâncias de diferentes topologias e tamanhos.
+Os experimentos realizados sugerem que o algoritmo proposto é superior ao modelo de programação linear resolvido com CPLEX.
+\end{englishabstract}
+
+\listoffigures
+
+\listoftables
+
+\listofalgorithms
+\addcontentsline{toc}{section}{LIST OF ALGORITHMS}
+
+\begin{listofabbrv}{VNEP}
+        \item[VNEP] Virtual Network Embedding Problem
+        \item[UFP]  Unsplittable Flow Problem
+        \item[ILP]  Integer Linear Program
+        \item[B\&P] Branch \& Price
+        \item[B\&B] Branch \& Bound
+        \item[RMP]  Restricted Master Problem
+        \item[CG]   Column Generation
+\end{listofabbrv}
+
+%\addcontentsline{toc}{subsection}{Preface}
+%\tableofcontents*
+\newpage
+
+\chapter*{Contents}
+\makeatletter
+\@starttoc{toc}
+\makeatother
+
+\input{introduction.tex}
+
+\input{relwork.tex}
+
+\input{problem.tex}
+
+\input{cg.tex}
+
+\input{bp.tex}
+
+\input{results.tex}
+
+\input{conclusion.tex}
+
+%\bibliography{VNE}
+%\bibliographystyle{plainnat}
+\bibliographystyle{abntex2-alf}
+\bibliography{VNE}
+
+\input{appendix.tex}
+
+\end{document}

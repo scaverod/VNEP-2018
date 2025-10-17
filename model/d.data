@@ -1,0 +1,20 @@
+set VV := 1 b;
+set VS := s1 s2 s3;
+
+param: cv :=
+  1 10
+  b 20;
+
+param: cs :=
+  s1 10
+  s2 5 
+  s3 20;
+
+param bv: 1 b :=
+  1 0 10
+  b 0 0;
+
+param bs: s1 s2 s3 :=
+  s1  0 10  0
+  s2 10  0 10
+  s3  0 10  0;

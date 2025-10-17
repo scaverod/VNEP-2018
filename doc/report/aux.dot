@@ -1,0 +1,31 @@
+Graph example {
+  ratio="0.7";
+  center=true;
+  {rank=1;
+  a
+    }
+  {rank=same; b; d}
+  c;
+
+  a -- b [label="10"]
+  b -- c [label="5"]
+  c -- d [label="20"]
+  d -- a [label="30"]
+
+  
+  node [shape=box,style=filled,color=grey]
+  {p1; p2; p3;}
+  p1 -- a [style=dotted]
+  p1 -- d [style=dotted]
+  p1 -- c [style=dotted]
+  
+  p2 -- a [style=dotted]
+  p2 -- d [style=dotted]
+  p2 -- c [style=dotted]
+
+
+  p3 -- d [style=dotted]
+
+
+}
+

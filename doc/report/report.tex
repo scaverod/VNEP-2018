@@ -1,0 +1,201 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsfonts}
+%\usepackage{amsthm}
+\usepackage{makeidx}  % allows for indexgeneration
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{verbatim}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{times}  
+\usepackage{tocbibind}
+\usepackage[lined, boxed, linesnumbered]{algorithm2e}
+\usepackage{array}
+\usepackage{makecell}
+\usepackage{tikz}
+\usepackage{lscape}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{subfig}
+
+\title{Virtual Network Embedding Problem}
+%\author{Leonardo F.S. Moura}
+%\institute{Universidade Federal do Rio Grande do Sul}
+\newtheorem{proposition}{Proposition}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}{Lemma}[section]
+\begin{document}
+\pagestyle{headings}
+
+%\maketitle
+
+\section{Models}
+
+The compact model, called henceforth COMP:
+
+\begin{align}
+    \min & \sum\limits_{(s,j) \in E^{S}} \sum\limits_{(v,w) \in E^{V}} B_{v,w} y_{v,w,s,j} \nonumber \\
+    s.t. & \sum\limits_{v \in V^{V}} C_{v} x_{v,s} \leq C_{s}                     & \forall s \in V^{S}  \label{eq:flowcap} \\
+    & \sum\limits_{s \in V^{S}} x_{v,s} = 1                                  & \forall v \in V^{V}  \label{eq:flowvirone}\\
+         & \sum\limits_{v \in V^{V}} x_{v,s} \leq 1                               & \forall s \in V^{S} \label{eq:flowsubone}\\
+         & \sum\limits_{j \in V^{S}} y_{v,w,s,j} - \sum\limits_{j \in V^{S}} y_{v,w,j,s} = x_{v,s} - x_{w,s}  & \forall (v,w) \in E^{V}, s \in V^{S}\label{eq:flowflow} \\
+         & \sum\limits_{(v,w) \in E^{V}} B_{v,w} y_{v,w,s,j} \leq B_{s,j}  & \forall (s,j) \in E^{S} \label{eq:flowbandwidth} \\
+         & x_{v,s} \in \{0,1\} & \forall v \in V^{V}, s \in V^{S} \\
+         & y_{k,l,m,n} \in \{0,1\} & \forall (k,l) \in E^{V}, (m,n) \in E^{S}
+\end{align} 
+
+The Column Generation model, called CG:
+\begin{align}
+  \min  & \sum\limits_{k \in E^{V}}\sum\limits_{p \in P^k}  c_{p} B_k z_{p} \label{eq:obj} \\
+        & \sum\limits_{s \in V^{S}} x_{v,s} = 1                                  & \forall v \in V^{V} \label{eq:virone} \\
+        & \sum\limits_{v \in V^{V}} x_{v,s} \leq 1                               & \forall s \in V^{S} \label{eq:subone} \\
+        & \sum\limits_{p \in P^{k}} z_{p} = 1                                    & \forall k \in E^{V} \label{eq:virdemone} \\
+        & \sum\limits_{k \in E^{V}}\sum\limits_{p \in P^{k}} \delta_{e,p} B_{k} z_{p} \leq B_{e} & \forall e \in E^{S} \label{eq:bandwidth} \\
+        &  \sum\limits_{k \in E^{V}}\sum\limits_{p \in P^k} \delta_{v,s,p} z_{p} \leq M x_{v,s} & \forall v \in V^{V}, s \in V^{S} \label{eq:onlyoneaux}\\
+        &  x_{v,s} \in \{0,1\}  & \forall v \in V^{V}, s \in V^{S} \nonumber \\
+        & z_{p} \in \{0,1\}    & \forall p \in {P} \nonumber
+\end{align}
+
+What follows is a proof that the models are equivalent, in the sense that both
+the solution space and the optimal solution of any instance of those models is
+the same.
+
+\begin{theorem}
+  Every solution x of COMP is a solution of CG
+\end{theorem}
+
+First, let us consider the solution space S of COMP.
+
+\begin{align}
+  S = \{ (y, x) | C_{V} x \leq C_{S}, \Delta~is~a~path, \Delta \geq 0, x \geq 0 \} 
+\end{align}
+
+Every element of $S$ can be written as
+
+\begin{align}
+        & y_{v,w,s,j} = \sum\limits_{p \in P^{(v,w)}} \delta_{s,j,p} z_{p} \label{eq:definition} \\
+        %& x_{v,s} = \sum\limits_{(v,w) \in E^V} \sum\limits_{p \in P^{(v,w)}} \delta_{v,s,p} z_{p}
+\end{align}
+
+%\begin{align}
+%  s.t.  & \sum\limits_{p \in P^{k}} z_{p} = 1, z_{p} \geq 0 
+%\end{align}
+
+Constraints~\ref{eq:flowvirone} and \ref{eq:flowsubone} are equivalent to
+Constraints~\ref{eq:virone} and \ref{eq:subone}, respectively.
+
+Constraints~\eqref{eq:flowbandwidth} is equivalent to Constraints~\eqref{eq:bandwidth},
+directly from definition (\ref{eq:definition}).
+
+Constraints~\ref{eq:flowflow} can be represented by using path variables, by definition:
+
+\begin{align}
+  \sum\limits_{j \in V^{S}} y_{v,w,s,j} - \sum\limits_{j \in V^{S}} y_{v,w,j,s} = x_{v,s} - x_{w,s}     & \quad \forall (v,w) \in E^{V}, s \in V^{S} \\
+  \sum\limits_{j \in V^{S}} \sum\limits_{p \in P^k} \delta_{s,j,p} z_{p} - \sum\limits_{j \in V^{S}}\sum\limits_{p \in P^k} \delta_{j,s,p} z_{p} = x_{v,s} - x_{w,s}     & \quad \forall (v,w) = k \in E^{V}, s \in V^{S} \label{eq:flowlfowwithpathvar}
+\end{align}
+
+Let $p = v_{1},v_{2},\ldots,v{k}$ be a path in the substrate graph. Since $p$
+is an undirected path in a graph, with exception of $j = v_{1}$ and $ j = v_{k}$,
+the right hand side of \ref{eq:flowlfowwithpathvar} is going to be equal 
+to zero. So this equation is equivalent to:
+
+\begin{align}
+  \sum\limits_{p \in P^k : (v,s) \in p} z_{p}
+    - \sum\limits_{p \in P^k : (s,w) \in p} z_{p} 
+    = x_{v,s} - x_{w,s}   
+    & \quad \forall (v,w) = k \in E^{V}, s \in V^{S} \label{eq:flowwithpathvar}
+\end{align}
+
+If for every $v \in S^V$ we sum every equation~\ref{eq:flowwithpathvar}.
+
+\begin{align}
+  \sum\limits_{k \in E^{V}}\sum\limits_{p \in P^k : (v,s) \in p} z_{p}
+    - \sum\limits_{(v,w) = k \in E^V}\sum\limits_{p \in P^k : (s,w) \in p} z_{p} & \nonumber \\
+    = |\delta(v)| x_{v,s} - \sum\limits_{(v,w) \in E^{V}} x_{w,s}       & \quad \forall v \in V^{V}, s \in V^{S}
+\end{align}
+
+Since by Equation~\ref{eq:flowsubone} and by the integrality property of the decision variables, the right
+hand-side of the equation can be either zero or one. The equation holds in both of those cases.
+If it is zero, the right hand side of \eqref{eq:flowwithpathvar} is non-negative, so
+the left hand-side of that equation is also non-negative. If it is one, the left hand-side
+can be at most one, so the equation also holds, therefore in all cases the equation is positive.
+Therefore the left-hand side of ? is always smaller than the right hand side and the 
+Equation~\eqref{eq:final} holds.
+
+
+\begin{comment}
+\begin{align}
+    \sum\limits_{(v,w) \in E^{V}} x_{w,s} -
+    \sum\limits_{(v,w) = k \in E^{V}}\sum\limits_{p \in P^k : (s,w) \in p} z_{p} \geq 0 & \quad \forall v \in V^{V}, s \in V^{S} \\
+    \sum\limits_{(v,w) = k \in E^{V}}\sum\limits_{p \in P^k : (s,w) \in p} z_{p} \leq \sum\limits_{(v,w) \in E^{V}} x_{w,s} & \quad \forall v \in V^{V}, s \in V^{S} 
+\end{align}
+\end{comment}
+
+\begin{align}
+  \sum\limits_{k \in E^{V}}\sum\limits_{p \in P^k : (v,s) \in p} z_{p} \leq M x_{v,s}       & \quad \forall v \in V^{V}, s \in V^{S}
+  \label{eq:final}
+\end{align}
+
+% TODO prove that sum zp = 1. tip: sum (19) to every s
+
+\begin{comment}
+\section{Results}
+
+\begin{table}
+\caption{Casos com muitos recursos}
+
+\begin{tabular}{l r r r}
+size        & compact(s)       &  DFS              &  BFS              \\ 
+ \hline 
+ 10\_16     &  0.053           &  {\bf 0.006}      &  0.008            \\ 
+ 10\_2      &  0.011           &  {\bf 0.007}      &  {\bf 0.007}      \\ 
+ 10\_4      &  0.077           &  {\bf 0.011}      &  0.014            \\ 
+ 10\_8      &  0.032           &  0.031            &  {\bf 0.025}      \\ 
+ 20\_16     &  0.644           &  0.069            &  {\bf 0.058}      \\ 
+ 20\_2      &  0.013           &  {\bf 0.007}      &  {\bf 0.007}      \\ 
+ 20\_4      &  0.294           &  {\bf 0.022}      &  0.036            \\ 
+ 20\_8      &  {\bf 0.1}       &  10.946           &  16.521           \\ 
+ 40\_16     &  900.451         &  {\bf 900.029}    &  900.115          \\ 
+ 40\_2      &  0.037           &  {\bf 0.005}      &  0.007            \\ 
+ 40\_4      &  4.206           &  {\bf 0.126}      &  0.278            \\ 
+ 40\_8      &  {\bf 68.021}    &  547.98           &  244.497          \\ 
+ 80\_16     &  901.816         &  {\bf 900.013}    &  900.17           \\ 
+ 80\_2      &  0.046           &  {\bf 0.012}      &  {\bf 0.012}      \\ 
+ 80\_4      &  24.896          &  {\bf 0.208}      &  0.478            \\ 
+ 80\_8      &  900.47          &  900.017          &  {\bf 669.007}    \\ 
+\end{tabular}
+\end{table}
+
+
+\begin{table}
+
+\caption{Casos com poucos recursos}
+\begin{tabular}{l r r r}
+size        & compact(s)       &  DFS              &  BFS              \\ 
+ \hline 
+ 10\_16     &  0.035           &  {\bf 0.004}    &  0.008          \\ 
+ 10\_2      &  {\bf 0.003}     &  0.006          &  0.006          \\ 
+ 10\_4      &  0.014           &  {\bf 0.007}    &  {\bf 0.007}    \\ 
+ 10\_8      &  0.012           &  {\bf 0.004}    &  0.007          \\ 
+ 20\_16     &  0.13            &  {\bf 0.01}     &  0.015          \\ 
+ 20\_2      &  0.009           &  {\bf 0.006}    &  {\bf 0.006}    \\ 
+ 20\_4      &  0.096           &  {\bf 0.015}    &  0.018          \\ 
+ 20\_8      &  0.1             &  {\bf 0.008}    &  0.01           \\ 
+ 40\_16     &  0.704           &  0.024          &  {\bf 0.02}     \\ 
+ 40\_2      &  0.018           &  {\bf 0.007}    &  {\bf 0.007}    \\ 
+ 40\_4      &  0.357           &  0.297          &  {\bf 0.272}    \\ 
+ 40\_8      &  0.416           &  {\bf 0.338}    &  0.473          \\ 
+ 80\_16     &  2.941           &  0.071          &  {\bf 0.066}    \\ 
+ 80\_2      &  0.039           &  {\bf 0.006}    &  0.009          \\ 
+ 80\_4      &  1.662           &  2.243          &  {\bf 0.593}    \\ 
+ 80\_8      &  2.112           &  0.207          &  {\bf 0.171}    \\
+\end{tabular}
+\end{table}
+\end{comment}
+%\bibliography{VNE}
+%\bibliographystyle{abnt}
+%\bibliographystyle{splncs}
+\end{document}
+

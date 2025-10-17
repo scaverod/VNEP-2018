@@ -1,0 +1,67 @@
+\documentclass[10pt, a4paper]{article}
+ \usepackage[brazilian,english]{babel}
+ \usepackage[utf8x]{inputenc}
+ \usepackage[T1]{fontenc}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{verbatim}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{times}  
+\usepackage{tocbibind}
+\usepackage[lined, boxed, linesnumbered]{algorithm2e}
+\usepackage{array}
+\usepackage{makecell}
+\usepackage{tikz}
+\usepackage{lscape}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{subfig}
+
+\title{Resumo estendido --- Soluções Exatas para o Problema de Mapeamento de Redes Virtuais}
+\author{Leonardo Fernando dos Santos Moura}
+\newtheorem{proposition}{Proposition}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}{Lemma}[section]
+\begin{document}
+
+\maketitle
+
+\section{O problema de mapeamento de redes virtuais}
+Virtualização de redes tem sido visto como a solução para o problema de ossificação da Internet permitindo mudanças nos protocolos de maneira mais rápida e eficiente \cite{Feamster:2007}. O problema de mapeamento de redes virtuais consiste em mapear uma ou mais redes virtuais em uma rede física, permitindo que várias redes compartilhem os mesmos recursos físicos. Nodos virtuais devem ser mapeados em nodos físicos que possuam capacidade suficiente para hospedá-los. Os enlaces virtuais devem ser mapeados a um enlace físico ou a um caminho físico que comunique os dois nodos virtuais. Este caminho deve ter capacidade suficiente também para hospedar os enlaces virtuais. Além de encontrar um mapeamento realizável, o objetivo do problema é minimizar uma função objetivo que pode ser definida, por exemplo, como o custo de um certo mapeamento. Um exemplo de uma instância do problema pode ser visto na Figura~\ref{fig:instance}.
+
+\begin{figure}[h]
+  {\centering
+    	\includegraphics[height=2.5in]{instance}
+	    \center\caption{Instância de exemplo.}
+    	\label{fig:instance}
+    }
+\end{figure}
+
+Nesse exemplo temos uma rede física na esquerda composta de quatro nodos, todos os enlaces físicos tem uma capacidade de banda de 1. Na direita temos a rede virtual, composta de 3 nodos. Uma possível solução seria mapear o nodo ``p1'' no nodo ``a'', o nodo ``p2'' no nodo ``b'' e o nodo p3 no nodo ``c'' e os enlaces virtuais $(p1,p2)$ no enlace físico $(a,b)$ e $(p2,p3)$ no enlace $(b,c)$.
+
+O problema de mapeamento de redes virtuais é uma problema difícil e a maioria dos artigos da literatura não tratam o problema de forma exata \cite{Chowdhury2010}, mas utilizando heurísticas ou técnicas de aproximação. O objetivo desse trabalho é estudar técnicas exatas de resolução para o problema de mapeamento de redes virtuais.
+
+\subsection{Definição do Problema}
+Na literatura existem diversas definições para o problema de mapeamento de redes virtuais. Cada autor especifica as características específicas que quer tratar. O presente trabalho pretende tratar o modelo mais simplificado mas que ainda preserva as características que tornam o problema difícil de ser resolvido de forma ótima.
+
+Portanto, o problema tratado consiste em mapear uma rede virtual em uma rede física. Cada nodo da rede física pode hospedar somente um nodo virtual. 
+
+A rede virtual é modelada através de um grafo $N^{V}=(V^{V},E^{V})$. Cada nodo $v \in V^{V}$ representa um nodo virtual com uma demanda de CPU de $C_{v}$. Cada aresta $e \in E^{V}$ representa um enlace virtual com demanda de banda de $B_{e}$. Já a rede física é modelada através de um grafo $N^{S}=(V^{S},E^{S})$. Cada nodo $v \in V^{S}$ tem uma capacidade de CPU de $C_{v}$. Cada aresta $e \in E^{S}$ representa um enlace físico com capacidade $B_{e}$.
+
+Um mapeamento válido $M$ tem que respeitar as seguintes restrições:
+\begin{itemize}
+  \item Todo o nodo virtual deve ser mapeado em um nodo físico. A capacidade de CPU desse nodo físico tem que ser maior do que a demanda do nodo virtual.
+  \item Cada nodo físico pode hospedar no máximo um nodo virtual.
+  \item Cada enlace virtual $(u, v)$ tem que ser mapeado em um caminho (uma sequência de um ou mais arcos adjacentes) na rede físico entre os nodos físicos que hospedam os nodos virtuais $v$ e $u$. Todos os enlaces nesse caminho tem que ter capacidade suficiente de banda para hospedar o link $(u,v)$.
+\end{itemize}
+
+Além disso procura-se encontrar um mapeamento válido de custo mínimo. O custo é definido como a banda usada pelos arcos virtuais, ou seja, a soma de cada demanda multiplicada pelo número de enlaces físicos utilizadas pelo enlace virtual.
+
+
+\bibliography{VNE}
+%\bibliographystyle{abnt}
+\bibliographystyle{plain}
+\end{document}

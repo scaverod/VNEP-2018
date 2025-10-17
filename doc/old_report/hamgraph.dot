@@ -1,0 +1,10 @@
+Graph ham {
+  {rank=1; a}
+  {rank=same; b; d}
+  
+  a -- b
+  b -- c
+  c -- d
+  d -- a
+}
+

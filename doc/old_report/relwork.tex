@@ -1,0 +1,125 @@
+\section{Related Work}
+\label{sec:relwork}
+Little work has been done in the area of exact algorithms for the VNEP\@. Almost all publications that cover exact methods, also present heuristic methods due to the complexity of the problem. In Table~\ref{tab:papers} the characteristics of the problems dealt by the articles referenced are summarized. The column \textbf{Approach} indicates whether the exact algorithm, the heuristic algorithm, or both is presented in the referenced article. \textbf{Path Splitting} states if path splitting is allowed. \textbf{Multiple Request} states if the algorithm presented deals with multiple network requests along a window of time.
+
+\begin{table}[h]
+\begin{center}
+  \caption{Overview of the main works\label{tab:papers}}
+  \begin{tabular}{c c c c c c}
+  Reference                               & Approach            & Path Splitting & Multiple Requests \\
+  \hline
+  Yu et al. \cite{Yu2008}                 & Heuristic           & yes        & yes \\
+  Trihn et al. \cite{Trinh:2011}          & Exact               & no         & yes \\
+  Alkmin et al. \cite{Alkmim2013}         & Exact + Heuristic   & no         & 2 versions \\
+  %Fajjari et al. \cite{Fajjari2011}       & Heuristic           & no          & yes \\
+  Lischka et al.   \cite{Lischka2009}     & Exact               & 2 versions  & yes \\
+  Chowdhury et al. \cite{Chowdhury:2012}  & Exact + Heuristic   & yes         & 2 versions \\
+  Pag\`{e}s et al. \cite{Pages:2012}      & Exact + Heuristic   & no          & yes \\
+  Hu et al. \cite{hu:2013}                & Exact               & yes         & no \\
+  Jarray et al. \cite{Jarray2012}         & Exact               & no          & yes \\
+  \end{tabular}
+\end{center}
+\end{table}
+
+This section describes in details some of the most relevant papers related to the exact solution of the Virtual Network Embedding Problem. 
+
+\subsection{Rethinking Virtual Network Embedding: Substrate Support for Path Splitting and Migration \cite{Yu2008}}
+The contribution of this paper is twofold: It proposes a virtual network embedding algorithm that allows one virtual edge to be mapped to multiple substrate paths (path splitting) and migration of these paths to optimize the physical substrate usage. Additionally it proposes specialized virtual network embedding algorithms for special classes of virtual network requests. The objective function treated is multi-objective, a maximization of the revenue and a minimization of the total cost.
+
+In the proposed approach, the virtual network requests are put in priority queue. Each virtual network request has a lifetime that can range from a few minutes to several days. Periodically the requests in the queue are processed in order of decreasing revenue. An heuristic mapping algorithm is run for each request, if the algorithm fails in finding a valid mapping, the network request is rejected. The mapping algorithm works in two sequential phases: The node mapping and the link mapping.
+
+Two algorithms are used for node mapping: a specialized version for hub-and-spoke topologies and a general algorithm. The general algorithm maps the nodes in a greedy way using information of the substrate node resources and the available bandwidth of the adjacent physical links. Hub-and-spoke are hierarchical topologies, commonly found in centralized databases/servers. The specialized algorithm maps the hubs first in a greedy way. A shortest-path algorithm is used to map the spoke nodes, the closest available substrate node with enough capacity is selected to host each spoke node.
+
+After the virtual nodes are mapped, virtual links need to be mapped to physical paths between the endpoints of those virtual links. If path splitting is not allowed, those paths are found using k-shortest paths algorithm iteratively. For networks that allow path splitting, a multicommodity flow algorithm is used. If after the flow is found, there is a substrate edge that is congested, i.e.\ an edge that holds more flow than its capacity, the endpoint of this edge is mapped to another substrate node and another multicommodity flow algorithm is run, the process is repeated until either a valid mapping is found or a limit number of iterations is run.
+
+Additionally, path migrations is executed periodically. Some paths are remapped to improve the cost of the served requests. These paths are found by using the multicommodity flow algorithm, if a new path is found that reduces the cost of the request, the path migrations is performed.
+
+The instances used for the experiments were generated using the GT-ITM tool. The substrate network used has 100 nodes, and about 500 links. The CPU and bandwidth capacities are uniformly distributed in the interval $[0,100]$. The virtual network requests have a size ranging form 2 to 10. Multiple demands of node and link resources are used. Ranging from a mean of 25 to 50 of link resources and 0 to 25 to node resources.
+
+The results show that using specif versions of node mapping for some topologies has a clear benefit in the cost and revenue. Path splitting is shown to better use the physical resources, specially when resources are more limited in relation to the demands.
+
+
+\subsection{Quality of service using careful overbooking for optimal virtual network resource allocation \cite{Trinh:2011}}
+A nonlinear version of the problem is formulated in \cite{Trinh:2011}. In it, the substrate resources are divided between the allocated virtual networks. In certain applications --- such as e-mail, fax, SMS ---, the allocated resources do not need to be exclusive, but can be offered within a certain guaranteed level of quality.
+
+The authors claim that the sharing of resources brings forth an economy of roughly 0.74, but there is not much data to validate this claim. The experimental results are limited, only one physical substrate network was used.
+
+\subsection{A Virtual Network Mapping Algorithm based on Subgraph Isomorphism Detection \cite{Lischka2009}}
+This paper contribution is a one-stage method for the VNEP based on the backtrack method for subgraph isomorphism detection vnmFlib. As the nodes and edges are mapped at the same time, problematic node or edge mappings can be discarded early. Moreover, a short NP-Completeness proof of the VNEP is presented.
+
+In the graph isomorphism problem, two graphs $S=(V,E)$ and $G=(K,F)$ are given as inputs. The goal is to find a mapping $\phi : V \rightarrow K$  of the nodes of $S$ into the nodes of $G$, such that each edge $(u,v)$ has a corresponding edge  $(\phi(u), \phi(v)) \in  F$.
+
+The proposed algorithm works as follows: Suppose one part of the virtual network is already mapped, the next virtual node $u$ to be mapped is selected. All substrate nodes that do not host virtual nodes in the current solution are candidates to host $v$. The first node in this list is selected. Then, all virtual links that join $u$ and another nodes already mapped are mapped. If no path is found, the algorithm backtracks to the last valid solution and maps $u$ to another substrate node. When all nodes and links of the virtual network are mapped or there are no more candidates, the algorithm stops.
+
+As the objective of this work is to find valid mappings of multiple virtual networks in a window of time, some steps are taken to limit the search space. The first is to limit the maximum size of a path in the substrate graph to $\epsilon$, what can improve the running time of the algorithm, but can fail to find a possibly valid solution in instances where a valid mapping exist. Likewise, the number of mappings (nodes in the backtrack tree) is limited by $\omega$. T
+
+Topologies used for experiments are generated with GT-ITM tool. The substrate graphs are composed of 100 nodes and around 500 links. The CPU constraints are uniformly distributed in the interval $[0,100]$. Different sets of virtual network requests are generated, their sizes are in the set $\{10,20,30,40\}$. For each size two network requests are generated, one with CPU demands in the interval $[0,30]$ and another in the interval $[0,90]$.
+
+The experiments show that the proposed algorithm results in better mappings and is faster than the traditional two stage approach taken in \cite{Yu2008} for requests with larger demands of resources.
+
+%\subsection{VNE-AC: Virtual Network Embedding Algorithm based on Ant Colony Metaheuristic \cite{Fajjari2011}}
+%This article presents a Max Min Ant Colony System algorithm to solve the VNEP\@. This type of metaheuristic is based on nature: a set of independent ants construct randomly a solution, the best one reinforces a pheromone trail, which other ants might follow.
+
+\subsection{ViNEYard: Virtual Network Embedding Algorithms With Coordinated Node and Link Mapping \cite{Chowdhury:2012}}
+This article presents a different approach for the VNEP\@. The common approach to solve it was to separate the problem in two sequential steps: The (greedy) mapping of the nodes and the mapping of edges into paths between the mapped nodes. Mapping the nodes without considering the virtual links can lead to poor performance. In order to reduce the solution space, their approach is to combine the two phases into one. This is achieved with a creation of an auxiliary graph.
+
+The physical networks allow path splitting. The article treats both the single request case and the time window case. The nodes and links are mapped in one step by transforming the VNEP in a multicommodity flow problem. On top of the substrate graph, one meta node is added to each virtual node. Each of the meta nodes is linked with substrate nodes with enough capacity to hold them. Each virtual link is then converted in a commodity with terminals in the meta nodes of its endpoints. To assure that each virtual node is mapped to a single substrate node, all virtual links adjacent to a virtual node must pass through a single meta edge.
+
+This transformed problem is modeled as a Mixed Integer Programming (MIP) model. As the solution of the MIP model is computationally expensive, two heuristic algorithms are presented. Those algorithms use the decision variables values obtained from the linear relaxation of the MIP model to produce a rounded solution.
+
+Each virtual node $v$ is associated with a set of binary decision variables $x$ relative to each substrate node $s$. The value of $x_{v,s}$ is one if and only if the virtual node $v$ is mapped to $s$. Since a relaxed version of the problem is used, these variables can have fractional values. Two rounding schemes are presented: In the deterministic version, for each virtual node $v$, the variable with the largest value $x_{v,s}$ is set to one, and all others to zero. In the random version, the variables are selected randomly with probability corresponding to their values. After all nodes are fixed, another multicommodity flow algorithm is run.
+
+This work also presents an algorithm for serving multiple requests along the time. That algorithm uses previous information of future requests to improve the total revenue obtained.
+
+In the experimental results, the substrate network graphs are randomly generated with 50 nodes using GT-ITM tool. The CPU and bandwidth of the substrate nodes are uniformly distributed in the range $[50,100]$. The virtual networks are generated with sizes between 2 and 10 with bandwidth and CPU demands in the range $[0,50]$. The algorithms presented are compared with two greedy, two-step algorithms. The results show that the proposed methods result in a better acceptance ratio and larger revenue. In terms of execution times, the proposed algorithms perform worse than the greedy algorithm due to the use of the multicommodity flow algorithm two consecutive times. But the overhead in computation can lead to more revenue to the InPs.
+
+
+
+\subsection{Optimal Mapping of Virtual Networks \cite{Alkmim2013}}
+ The main contribution of this paper is presenting a formulation that takes into account the transportation and installation of software images necessary to the virtual routers. To solve this issue, the problem is broken in two parts: The VNEP and the routing of the images through the network. Six algorithms are presented, one exact using an integer linear model solved using Branch \& Cut, and five approximative. The substrate networks used have up to 400 routers.
+
+Six algorithms are presented. The Optimal algorithm solves two ILP models optimally by applying Branch~\&~Cut. The root algorithm stops at the root of the Branch \& Cut tree. In the iterative rounding scheme the relaxed decision variable with the largest value is set to one, and all others to zero. In the random scheme, a random number is used to select which variable is rounded to one, the values of the relaxed decision variable is the probability of that variable being rounded to zero. The approximative algorithms can be either iterative or not. In the latter case, all variables are rounded at once. In the iterative version, a fractional variable is fixed a new relaxed problem is solved until all variables have integer values.
+
+The topologies used in the experimental results are generated using BRITE\@. The substrate graph size is 20 and the bandwidth capacities are uniformly distributed in the interval $[1, 10]$. Three types of virtual network requests are used. The number of nodes in all three types is in the set $\{5, 8, 10\}$ with bandwidth demands in the ranges $\{[100-200], [200-300], [300-400]\}$.
+
+In the experimental analysis the author claims that the root algorithm is the best one. What the author seem to imply with stopping at the root, is that the search for an integer solutions stops at the first leaf. This seems to be the case as the solutions obtained by the root algorithm always have a larger objective value than the optimal version. The root algorithm results in a better acceptance ratio in their simulation. Therefore, there is a trade-off between solution quality and running time.
+
+For the approximate algorithms, it is not clear what happens when a rounding scheme fails in providing a valid solution. It would be interesting to know the success rate of the different rounding schemes presented.
+
+\subsection{Strategies for Virtual Optical Network Allocation \cite{Pages:2012}}
+This work proposes both an integer linear programming model and a metaheuristic search to solve the problem of virtual network embedding for Optical networks. The problem is named Virtual Optical Network Allocation (VONA) problem. Optical networks differ from normal networks in the sense that each physical edge has a limited number of wavelengths, and the substrate nodes do not have the ability to change the wavelength of the virtual link passing through it, so each virtual link has to be mapped to a path in the physical network were all edges use the same wavelength. The objective is to find any valid solution, with no restrictions on its quality.
+
+Two variations of the VONA problem are presented: The transparent VONA, that requires the exact set of wavelengths for every virtual link, and the opaque VONA, in which there is no need to allocated the same wavelengths for each virtual link.
+
+The article presents two ILP models, one for the transparent case and one for the opaque VONA\@. Since solving an ILP model is computationally expensive, a heuristic algorithm is presented based on the GRASP metaheuristic.
+
+The algorithms presented are tested in a real network topology with 16 nodes. The virtual optical network requests are randomly generated. The running times of the GRASP algorithm are reportedly better with at most one more request blocked than the exact algorithm. The behavior of the algorithms in larger graphs is not tested.
+
+\subsection{Resolve the virtual network embedding problem: A column generation approach \cite{hu:2013}}
+The contribution of this paper is that it formulates a path-based integer linear programming model for the VNE Problem and solves it using column generation. Each possible path is represented by a binary variable in the model, since the number of paths in an arbitrary graph can be exponential, the number of columns is exponential. To circumvent this problem, the column generation technique is used. In this technique, the linear relaxation of the problem with a few initial columns is solved. New columns are generated by solving a subproblem called the pricing problem. When no new columns are generated, the relaxation is optimal.\
+
+The pricing problem is the generation of new paths and the master problem is the selection of paths. The relaxed version of the master problem is solved and Branch \& Bound is used to obtain an integer solution.
+
+Graphs used in the experiments are generated with connectivity 50\% similar to \cite{Chowdhury:2012}. Virtual Networks are generated with sizes in the range $[2,10]$ and substrate graphs in the range $[10,50]$. The bandwidth and computational resource demands of the virtual network are generated in the interval $[1,20]$ and in $[1,50]$ for the capacities of substrate graph nodes and edges.
+
+The experimental analysis of the method is somewhat limited. Although the authors claim that their algorithm has a better running time than the one presented in \cite{Chowdhury2009}, no data is presented to support it. Only a comparison of the solution quality of heuristic variations of the presented algorithm is presented. This heuristic algorithm is not clearly presented. Since no running time data is presented the quality comparison is of little use, as an optimal solution can be obtained using their Branch \& Bound algorithm.
+
+\subsection{Column Generation Approach for One-Shot Virtual Network Embedding \cite{Jarray2012}}
+This article tackles multiple requests with a column generation approach. The optimal solution is obtained by using a Branch \& Price method. What the author labels ``One-Shot'' is the mapping of nodes and edges in a single step instead of two. The focus of this work is maximizing the revenue, so cost-efficient mapping are searched for. As there are several virtual networks, the master problem is to select virtual network demands to serve that yield the largest revenue. The pricing problem is the generation of new virtual network mappings or, as the authors call it, Independent Embedding Configurations (IEC). 
+
+Both the pricing and the master problem are solved using CPLEX\@. Apparently the set of all paths has to be generated prior to the execution of the algorithm, this can be an issue if larger physical substrate graphs are used.
+
+The column generation algorithm is compared with two greedy algorithms, the tests were run on a physical substrate graph extracted from the US metro backbone with 30 edges. The virtual networks were generated with a randomly selected size ranging from 2 to 20. The results evaluated were revenue, the amount of requests blocked, and the resource utilization of the served requests. The proposed column generation was demonstrated the best in those three criteria.
+
+\subsection{Security-aware Optimal Resource Allocation for Virtual Network Embedding \cite{Buriol:2012}}
+This work presents an integer linear program to solve optimally the VNEP with security requirements, such as data isolation and encryption.
+
+Six sets of experiments are used. The smallest with a physical substrate with 50 nodes and virtual networks with 17. The largest with the substrate graph of size 100 and virtual networks of size 66. The bandwidth capacity of the physical links is uniformly distributed between 1000 and 10000 and the virtual link demands are limited to 3000 or 5000.
+
+In most of the experiments, the optimal solution is found in less than three hours, but some instances take more than 24 hours to solve. A metaheuristic is proposed as possible way to overcome this problem.
+
+\subsection{Introducing the Virtual Network Mapping Problem with Delay, Routing and Location Constraints \cite{infuhr:2011}}
+This paper introduces new constraints of delay and routing and focus on the generation of realistic instances for the VNEP\@. Substrate networks are generated by modifying real Internet topologies available online. The tool nem-0.9.6 was used to reduce randomly those topologies to the desired sizes while maintaining their original properties. The graphs produced were not necessarily connected. A bandwidth of 25 was assigned to the arcs of the substrate graph that were connected to a node with degree one. The capacities of the other edges was 25 times the minimum of the in-degree of the source node and the out-degree of the target node. The CPU capacity of each node was set as the minimum of the sum of the bandwidth of its incoming edges and the sum of its outgoing edges capacities. The virtual network requests were constructed from prototypical graphs called slices. Each slice has special requirements of delay and bandwidth. Those slices are assembled randomly to generate graphs with 50\% to 90\% of the size of the substrate graph. The problems are solved using CPLEX.
+
+\subsection{Conclusion}
+The literature on the topic is still new and thriving, there are still many interesting research topics related to the VNEP to be explored. Most articles do not focus on the theoretical aspects of the complexity of the VNEP\@. There is a lack of interest int the behavior of the algorithms for larger instances that those that are used nowadays. Some articles test their methods with small graphs, usually with just one graph. These types of graph can be manipulated or the methods can yield improvements on the running time and quality of the solutions out of sheer luck. Another issue with using small graphs is that of scale. Some algorithms have to process the set of paths in a graph, what is exponential in the number of nodes in a graph.

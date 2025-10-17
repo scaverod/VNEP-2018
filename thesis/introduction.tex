@@ -1,0 +1,69 @@
+\chapter{Introduction}
+\label{sec:intro}
+
+% % % % % % motivation % % % % % % %
+
+The current Internet architecture supports a large array of applications and technologies. However due to its decentralized and heterogeneous nature, it has become difficult to address new requirements. Any architectural change in the Internet has to be agreed upon by Internet Service Providers, and hardware and software vendors. This problem has been called the ``ossification of the Internet.''
+
+Network Virtualization has been seen as the solution for the problem of ossification of the Internet, a way to facilitate the evolution of Internet protocols~\cite{Anderson2005}.
+By creating a new layer of abstraction over the physical networks, multiple networks can simultaneously use the same physical structure in a transparent way.
+In this way, new protocols can be tested on heterogeneous experimental architectures \cite{Anderson06geni}.
+
+Likewise, Service Providers can take advantage of Network Virtualization to offer customized services, like customized protocols or co-location from expanded network presence, by leasing resources from infrastructures providers \cite{Feamster:2007}.
+
+Virtualization is already being used in practice for supporting experimental facilities, such as GENI~\cite{Anderson06geni} and the Planet Lab architecture \cite{Chun:2003}. It has being seen as an enabler of Cloud Computing and Software Defined Networks (SDN) \cite{Guerzoni:2014}.
+
+Several technical problems arise in the implementation of virtual network environments. Among the main operational challenges are resource discovery, resource allocation and resource configuration \cite{Chowdhury2010}. The current work focusses on resource allocation in network virtualization.
+
+% % % % % % problem % % % % % % %
+The Virtual Network Embedding Problem (VNEP)
+--- also known as Network Testbed Mapping~\cite{Ricci:2003}, Virtual Network Assignment~\cite{Zhu:2006}, and Virtual Network Mapping \cite{Belbekkouche:2012} ---
+is central to achieve virtualization.
+It consists in allocating physical resources to virtual networks.
+Virtual nodes are mapped into physical nodes; and virtual links into physical paths that link the physical nodes that host their endpoints.
+Those physical resources have processing limitations that need to be taken into account. Additionally, applications usually need to select the best mapping according to some metric, such as cost, revenue, or power usage.
+
+As network virtualization is not yet a mature field, problems are still being defined and classified. Different classifications and more information about different constraints of virtualization problems are found in \cite{Fischer:2011,Chowdhury2010,FischerSurvey}.
+There are several variations of the problem such as mapping multiple networks simultaneously~\cite{Houidi:2011}, instead of a single one at a time~\cite{Chowdhury2010}.
+Some works map virtual networks in an online fashion (requests arrive dynamically, lasting for a period of time), using and releasing physical resources dynamically~\cite{Yu2008}. 
+Physical nodes and links can be restricted to host a limited number of virtual nodes and links or certain virtual links can have a location restriction.
+Some applications have security restrictions, that limit the subset of physical nodes and links that can be used for mapping~\cite{Buriol:2012}.
+Additional constraints can also be present such as delay~\cite{infuhr:2011}, efficient use of energy~\cite{Botero:2012}, and redundancy~\cite{Shamsi:2008}. 
+This work captures the core of those constraints into a VNEP definition that is both hard and generic.
+
+%The fist aspect is the number of requests to be mapped. In general, the goal of virtualization is to use the same physical network to accommodate multiple network requests. Some authors present the mapping of one single network request at a time. Others present the mapping of multiple requests in a window of time. In the latter case, the requests can be known in advance or dynamically. When multiple network requests are to be served, 
+
+%Finally, some applications allow the networks do adapt along the windows of time. Adaptive resource allocation is shown to maximize the aggregate performance of multiple virtual networks \cite{He:2008}. Adaptive algorithms will not be studied in the present report.
+
+Due to the difficulty of solving the VNEP, few exact algorithms are proposed in the literature.
+For most practical purposes, heuristic algorithms can provide good suboptimal solutions for the problem.
+Still, exact algorithms serve as a comparison or baseline to evaluate heuristic algorithms.
+Moreover, they can be practical for specific cases, such as for small virtual virtual networks or physical networks with a large amount of resources.
+
+
+% TODO summarize work
+
+Only recently exact algorithms for the VNEP have been explored.
+This work proposes a Branch \& Price algorithm for the VNEP that is able to solve optimally larger instances than those that were previously solved through other exact algorithms presented in the literature. This algorithm is compared experimentally with randomly generated instances with four different types of topologies, ranging from twenty to two hundred nodes.
+
+% % % % % % contribution % % % % % % %
+
+This work contributions are the following:
+
+\begin{itemize}
+  \item a concise VNEP version is presented. That problem is both generic and hard to solve, preserving the main components of all VNEP definitions;
+  \item the problem is further classified by providing a complexity proof;
+  \item a new extensive model is presented for the Single-Path VNEP;
+  \item this model is solved with a column generation algorithm;
+  \item an efficient algorithm for solving the pricing problem of column generation algorithm is provided;
+  \item the column generation algorithm is extended to a Branch \& Price algorithm to provide optimal integer solutions for the problem;
+\end{itemize}
+
+% % outline % %
+An overview of related works with a focus on exact solutions for the VNEP is presented in Chapter~\ref{ch:relwork}.
+Chapter~\ref{ch:problem} describes the Virtual Network Embedding problem, presents available models and an analysis of its complexity.
+Chapter~\ref{ch:cg} presents the Column Generation algorithm.
+The Branch \& Price algorithm is detailed in Chapter~\ref{ch:bp}.
+Experimental results are presented and analysed in Chapter~\ref{ch:results}.
+Finally, this work is concluded in Chapter~\ref{ch:conclusion} with a summary of this study and future research directions.
+
