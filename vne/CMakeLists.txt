@@ -30,7 +30,7 @@ set(CMAKE_CXX_FLAGS "-Wno-unknown-pragmas -g -pedantic -lm -std=c++0x -O3 -fPIC 
 
 set(SRC src/main.cpp src/backtrack.cpp  src/bb.cpp src/bbcgu.cpp src/bprice_rec.cpp src/bprice.cpp  src/cg.cpp  src/cgunsplittable.cpp  src/cplex.cpp  src/fix.cpp src/ac.cpp  src/util.cpp  src/vnedefs.cpp)
 ADD_EXECUTABLE(vne.out ${SRC})
-TARGET_LINK_LIBRARIES(vne.out ${CPLEX_LIBRARIES} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(vne.out ${CPLEX_LIBRARIES} ${Boost_LIBRARIES} dl)
 #message(${BOOST_library_dirs})
 
 # tests
