@@ -106,8 +106,6 @@ IF(NOT CPOPTIMIZER_LIBRARY)
     HINTS ${CPLEX_ROOT_DIR}/cpoptimizer/lib/x86-64_sles10_4.1/static_pic
   )
 ENDIF()
-  HINTS ${CPLEX_ROOT_DIR}/cpoptimizer/lib/x86-64_sles10_4.1/static_pic
-)
 
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(CPLEX DEFAULT_MSG CPLEX_LIBRARY CPLEX_INCLUDE_DIR)
