@@ -3,6 +3,7 @@
 #include <vector>
 #include <limits>
 #include <queue>
+#include <numeric>
 
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #include <ilcplex/ilocplex.h>

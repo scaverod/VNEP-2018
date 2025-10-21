@@ -8,6 +8,7 @@
 #include <queue>
 #include <limits>
 #include <algorithm>
+#include <numeric>
 #include <exception>
 #include <functional>
 #include "../include/ac.h"

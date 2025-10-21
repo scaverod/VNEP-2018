@@ -4,6 +4,7 @@
 #include <iostream>
 #include <queue>
 #include <functional>
+#include <numeric>
 
 #include "../include/util.h"
 #include "../include/vnedefs.h"

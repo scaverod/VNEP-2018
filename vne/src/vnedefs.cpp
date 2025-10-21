@@ -7,6 +7,7 @@
 #include <vector>
 #include <set>
 #include <algorithm>
+#include <numeric>
 #include "../include/util.h"
 #include "../include/vnedefs.h"
 
