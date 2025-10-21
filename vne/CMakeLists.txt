@@ -7,8 +7,20 @@ set(Boost_LIBRARY_DIR /usr/local/boost/libs)
 FIND_PACKAGE(Boost 1.54.0 REQUIRED)
 FIND_PACKAGE(cplex REQUIRED)
 
+# Debug output
+message(STATUS "CPLEX_INCLUDE_DIR: ${CPLEX_INCLUDE_DIR}")
+message(STATUS "CONCERT_INCLUDE_DIR: ${CONCERT_INCLUDE_DIR}")
+message(STATUS "CPLEX_INCLUDE_DIRS: ${CPLEX_INCLUDE_DIRS}")
+message(STATUS "CPLEX_LIBRARY: ${CPLEX_LIBRARY}")
+message(STATUS "CPLEX_LIBRARIES: ${CPLEX_LIBRARIES}")
+
 #find_package(Boost COMPONENTS program_options timer system chrono)
-include_directories(include ${Boost_INCLUDE_DIR} ${CPLEX_INCLUDE_DIR} ${CONCERT_INCLUDE_DIR})
+# Use CPLEX_INCLUDE_DIRS if available, otherwise fall back to individual directories
+if(CPLEX_INCLUDE_DIRS)
+  include_directories(include ${Boost_INCLUDE_DIR} ${CPLEX_INCLUDE_DIRS})
+else()
+  include_directories(include ${Boost_INCLUDE_DIR} ${CPLEX_INCLUDE_DIR} ${CONCERT_INCLUDE_DIR})
+endif()
 #link_directories(${Boost_LIBRARY_DIR} ${CPLEX_LIBRARIES})
 
 # set(cplex_DIR /opt/cplex)

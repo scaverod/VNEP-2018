@@ -1,88 +1,111 @@
 SET(CPLEX_ROOT_DIR "" CACHE PATH "CPLEX root directory")
 
-FIND_PATH(CPLEX_INCLUDE_DIR
-  ilcplex/cplex.h
-  PATHS "C:/ILOG/CPLEX/include"
-  PATHS "/opt/ilog/cplex/include"
-  PATHS "/opt/cplex/cplex/include"
-  PATHS "~/ILOG/CPLEX_Studio_AcademicResearch122/cplex/include"
-  HINTS ${CPLEX_ROOT_DIR}/include
-  HINTS ${CPLEX_ROOT_DIR}/cplex/include
-)
+# Only search for CPLEX_INCLUDE_DIR if not already provided
+IF(NOT CPLEX_INCLUDE_DIR)
+  FIND_PATH(CPLEX_INCLUDE_DIR
+    ilcplex/cplex.h
+    PATHS "C:/ILOG/CPLEX/include"
+    PATHS "/opt/ilog/cplex/include"
+    PATHS "/opt/cplex/cplex/include"
+    PATHS "~/ILOG/CPLEX_Studio_AcademicResearch122/cplex/include"
+    HINTS ${CPLEX_ROOT_DIR}/include
+    HINTS ${CPLEX_ROOT_DIR}/cplex/include
+  )
+ENDIF()
 
-FIND_PATH(CONCERT_INCLUDE_DIR
-  ilconcert/ilomodel.h
-  PATHS "C:/ILOG/CONCERT/include"
-  PATHS "/opt/ilog/concert/include"
-  PATHS "/opt/cplex/concert/include"
-  PATHS "~/ILOG/CPLEX_Studio_AcademicResearch122/concert/include"
-  HINTS ${CPLEX_ROOT_DIR}/include
-  HINTS ${CPLEX_ROOT_DIR}/concert/include
-)
+# Only search for CONCERT_INCLUDE_DIR if not already provided
+IF(NOT CONCERT_INCLUDE_DIR)
+  FIND_PATH(CONCERT_INCLUDE_DIR
+    ilconcert/ilomodel.h
+    PATHS "C:/ILOG/CONCERT/include"
+    PATHS "/opt/ilog/concert/include"
+    PATHS "/opt/cplex/concert/include"
+    PATHS "~/ILOG/CPLEX_Studio_AcademicResearch122/concert/include"
+    HINTS ${CPLEX_ROOT_DIR}/include
+    HINTS ${CPLEX_ROOT_DIR}/concert/include
+  )
+ENDIF()
 
-FIND_PATH(CPOPTIMIZER_INCLUDE_DIR
-  ilcp/cp.h
-  PATHS "C:/ILOG/CPOPTIMIZER/include"
-  PATHS "/opt/ilog/cpoptimizer/include"
-  PATHS "/opt/cplex/cpoptimizer/include"
-  PATHS "~/ILOG/CPLEX_Studio_AcademicResearch122/cpoptimizer/include"
-  HINTS ${CPLEX_ROOT_DIR}/include
-  HINTS ${CPLEX_ROOT_DIR}/cpoptimizer/include
-)
+# Only search for CPOPTIMIZER_INCLUDE_DIR if not already provided
+IF(NOT CPOPTIMIZER_INCLUDE_DIR)
+  FIND_PATH(CPOPTIMIZER_INCLUDE_DIR
+    ilcp/cp.h
+    PATHS "C:/ILOG/CPOPTIMIZER/include"
+    PATHS "/opt/ilog/cpoptimizer/include"
+    PATHS "/opt/cplex/cpoptimizer/include"
+    PATHS "~/ILOG/CPLEX_Studio_AcademicResearch122/cpoptimizer/include"
+    HINTS ${CPLEX_ROOT_DIR}/include
+    HINTS ${CPLEX_ROOT_DIR}/cpoptimizer/include
+  )
+ENDIF()
 
-FIND_LIBRARY(CPLEX_LIBRARY
-  cplex
-  PATHS "C:/ILOG/CPLEX/lib/msvc7/stat_mda"
-  PATHS "/opt/ilog/cplex/bin"
-  PATHS "/opt/cplex/cplex/lib/x86-64_sles10_4.1/static_pic/"  
-  PATHS "~/ILOG/CPLEX_Studio_AcademicResearch122/cplex/lib/x86-64_sles10_4.1/static_pic/"
-  PATHS "~/ILOG/CPLEX_Studio_AcademicResearch122/cplex/bin"
+# Only search for CPLEX_LIBRARY if not already provided
+IF(NOT CPLEX_LIBRARY)
+  FIND_LIBRARY(CPLEX_LIBRARY
+    cplex
+    PATHS "C:/ILOG/CPLEX/lib/msvc7/stat_mda"
+    PATHS "/opt/ilog/cplex/bin"
+    PATHS "/opt/cplex/cplex/lib/x86-64_sles10_4.1/static_pic/"  
+    PATHS "~/ILOG/CPLEX_Studio_AcademicResearch122/cplex/lib/x86-64_sles10_4.1/static_pic/"
+    PATHS "~/ILOG/CPLEX_Studio_AcademicResearch122/cplex/bin"
+    HINTS ${CPLEX_ROOT_DIR}/bin
+    HINTS ${CPLEX_ROOT_DIR}/cplex/bin
+    HINTS ${CPLEX_ROOT_DIR}/lib
+    HINTS ${CPLEX_ROOT_DIR}/cplex/lib
+    HINTS ${CPLEX_ROOT_DIR}/cplex/lib/x86-64_sles10_4.1/static_pic
+  )
+ENDIF()
+
+# Only search for ILOCPLEX_LIBRARY if not already provided
+IF(NOT ILOCPLEX_LIBRARY)
+  FIND_LIBRARY(ILOCPLEX_LIBRARY
+    ilocplex
+    PATHS "C:/ILOG/CPLEX/lib/msvc7/stat_mda"
+    PATHS "/opt/ilog/cplex/bin"
+    PATHS "/opt/cplex/cplex/lib/x86-64_sles10_4.1/static_pic/"  
+    PATHS "~/ILOG/CPLEX_Studio_AcademicResearch122/cplex/lib/x86-64_sles10_4.1/static_pic/"
+    PATHS "~/ILOG/CPLEX_Studio_AcademicResearch122/cplex/bin"
   HINTS ${CPLEX_ROOT_DIR}/bin
   HINTS ${CPLEX_ROOT_DIR}/cplex/bin
   HINTS ${CPLEX_ROOT_DIR}/lib
   HINTS ${CPLEX_ROOT_DIR}/cplex/lib
   HINTS ${CPLEX_ROOT_DIR}/cplex/lib/x86-64_sles10_4.1/static_pic
-)
+  )
+ENDIF()
 
-FIND_LIBRARY(ILOCPLEX_LIBRARY
-  ilocplex
-  PATHS "C:/ILOG/CPLEX/lib/msvc7/stat_mda"
-  PATHS "/opt/ilog/cplex/bin"
-  PATHS "/opt/cplex/cplex/lib/x86-64_sles10_4.1/static_pic/"  
-  PATHS "~/ILOG/CPLEX_Studio_AcademicResearch122/cplex/lib/x86-64_sles10_4.1/static_pic/"
-  PATHS "~/ILOG/CPLEX_Studio_AcademicResearch122/cplex/bin"
-  HINTS ${CPLEX_ROOT_DIR}/bin
-  HINTS ${CPLEX_ROOT_DIR}/cplex/bin
-  HINTS ${CPLEX_ROOT_DIR}/lib
-  HINTS ${CPLEX_ROOT_DIR}/cplex/lib
-  HINTS ${CPLEX_ROOT_DIR}/cplex/lib/x86-64_sles10_4.1/static_pic
-)
+# Only search for CONCERT_LIBRARY if not already provided
+IF(NOT CONCERT_LIBRARY)
+  FIND_LIBRARY(CONCERT_LIBRARY
+    concert
+    PATHS "C:/ILOG/CONCERT/lib/msvc7/stat_mda"
+    PATHS "/opt/ilog/concert/bin"
+    PATHS "/opt/cplex/concert/lib/x86-64_sles10_4.1/static_pic"
+    PATHS "~/ILOG/CPLEX_Studio_AcademicResearch122/concert/lib/x86-64_sles10_4.1/static_pic/"
+    PATHS "~/ILOG/CPLEX_Studio_AcademicResearch122/concert/bin"
+    HINTS ${CPLEX_ROOT_DIR}/bin
+    HINTS ${CPLEX_ROOT_DIR}/concert/bin
+    HINTS ${CPLEX_ROOT_DIR}/lib
+    HINTS ${CPLEX_ROOT_DIR}/concert/lib
+    HINTS ${CPLEX_ROOT_DIR}/concert/lib/x86-64_sles10_4.1/static_pic
+  )
+ENDIF()
 
-FIND_LIBRARY(CONCERT_LIBRARY
-  concert
-  PATHS "C:/ILOG/CONCERT/lib/msvc7/stat_mda"
-  PATHS "/opt/ilog/concert/bin"
-  PATHS "/opt/cplex/concert/lib/x86-64_sles10_4.1/static_pic"
-  PATHS "~/ILOG/CPLEX_Studio_AcademicResearch122/concert/lib/x86-64_sles10_4.1/static_pic/"
-  PATHS "~/ILOG/CPLEX_Studio_AcademicResearch122/concert/bin"
-  HINTS ${CPLEX_ROOT_DIR}/bin
-  HINTS ${CPLEX_ROOT_DIR}/concert/bin
-  HINTS ${CPLEX_ROOT_DIR}/lib
-  HINTS ${CPLEX_ROOT_DIR}/concert/lib
-  HINTS ${CPLEX_ROOT_DIR}/concert/lib/x86-64_sles10_4.1/static_pic
-)
-
-FIND_LIBRARY(CPOPTIMIZER_LIBRARY
-  cp
-  PATHS "C:/ILOG/CPOPTIMIZER/lib/msvc7/stat_mda"
-  PATHS "/opt/ilog/cpoptimizer/bin"
-  PATHS "/opt/cplex/cpoptimizer/lib/x86-64_sles10_4.1/static_pic"
-  PATHS "~/ILOG/CPLEX_Studio_AcademicResearch122/cpoptimizer/lib/x86-64_sles10_4.1/static_pic/"
-  PATHS "~/ILOG/CPLEX_Studio_AcademicResearch122/cpoptimizer/bin"
-  HINTS ${CPLEX_ROOT_DIR}/bin
-  HINTS ${CPLEX_ROOT_DIR}/cpoptimizer/bin
-  HINTS ${CPLEX_ROOT_DIR}/lib
-  HINTS ${CPLEX_ROOT_DIR}/cpoptimizer/lib
+# Only search for CPOPTIMIZER_LIBRARY if not already provided
+IF(NOT CPOPTIMIZER_LIBRARY)
+  FIND_LIBRARY(CPOPTIMIZER_LIBRARY
+    cp
+    PATHS "C:/ILOG/CPOPTIMIZER/lib/msvc7/stat_mda"
+    PATHS "/opt/ilog/cpoptimizer/bin"
+    PATHS "/opt/cplex/cpoptimizer/lib/x86-64_sles10_4.1/static_pic"
+    PATHS "~/ILOG/CPLEX_Studio_AcademicResearch122/cpoptimizer/lib/x86-64_sles10_4.1/static_pic/"
+    PATHS "~/ILOG/CPLEX_Studio_AcademicResearch122/cpoptimizer/bin"
+    HINTS ${CPLEX_ROOT_DIR}/bin
+    HINTS ${CPLEX_ROOT_DIR}/cpoptimizer/bin
+    HINTS ${CPLEX_ROOT_DIR}/lib
+    HINTS ${CPLEX_ROOT_DIR}/cpoptimizer/lib
+    HINTS ${CPLEX_ROOT_DIR}/cpoptimizer/lib/x86-64_sles10_4.1/static_pic
+  )
+ENDIF()
   HINTS ${CPLEX_ROOT_DIR}/cpoptimizer/lib/x86-64_sles10_4.1/static_pic
 )
 
